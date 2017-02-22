@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://code.alibabatech.com/schema/dubbo
+        http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
+
+    <dubbo:application name="simpleService2"/>
+
+    <dubbo:registry address="zookeeper://127.0.0.1:2181" client="curator"/>
+
+    <dubbo:tracker protocol="zipkin" ref="braveRpcTrackerEngine"/>
+
+    <dubbo:protocol name="dubbo" port="20883"/>
+
+    <dubbo:service interface="com.nightawk.test.service.SecondService" ref="service2" timeout="-1"/>
+
+    <bean id="service2" class="com.nightawk.test.service.SecondServiceImpl"/>
+
+    <bean id="datasourceMySqlSessionFactory1" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource_mysql1"/>
+    </bean>
+
+    <bean id="dataSource_mysql1" class="org.apache.commons.dbcp.BasicDataSource">
+        <property name="driverClassName" value="${database.driverClassName}"/>
+        <property name="url" value="${database.url}"/>
+        <property name="username" value="${database.userName}"/>
+        <property name="password" value="root"/>
+        <property name="maxActive" value="10"/>
+        <property name="maxIdle" value="5"/>
+        <property name="maxWait" value="3000"/>
+    </bean>
+
+    <bean id="mysqlConfigurer1" class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="sqlSessionFactoryBeanName" value="datasourceMySqlSessionFactory1"/>
+        <property name="basePackage" value="demo.service"/>
+        <property name="annotationClass" value="org.springframework.stereotype.Component"/>
+    </bean>
+
+    <bean id="brave" class="com.nightawk.core.brave.BraveFactoryBean">
+        <property name="serviceName" value="simpleService2"/>
+        <property name="transport" value="http"/>
+        <property name="transportAddress" value="127.0.0.1:9411"/>
+    </bean>
+
+    <bean id="braveRpcTrackerEngine" class="com.nightawk.dubbo.spring.BraveRpcTrackerEngineFactoryBean">
+        <property name="brave" ref="brave"/>
+    </bean>
+
+    <bean class="com.nightawk.mysql.PreparedStatementInterceptorManagementBean" destroy-method="close">
+        <constructor-arg value="#{brave.clientTracer()}"/>
+    </bean>
+</beans>

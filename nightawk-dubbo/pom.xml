@@ -11,5 +11,36 @@
 
     <artifactId>nightawk-dubbo</artifactId>
 
+    <dependencies>
+        <dependency>
+            <groupId>xs</groupId>
+            <artifactId>nightawk-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
+        <dependency>
+            <groupId>io.zipkin.brave</groupId>
+            <artifactId>brave-core</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>io.zipkin.brave</groupId>
+            <artifactId>brave-web-servlet-filter</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>dubbo</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jboss.resteasy</groupId>
+            <artifactId>resteasy-jaxrs</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jboss.resteasy</groupId>
+            <artifactId>resteasy-client</artifactId>
+        </dependency>
+    </dependencies>
 </project>
