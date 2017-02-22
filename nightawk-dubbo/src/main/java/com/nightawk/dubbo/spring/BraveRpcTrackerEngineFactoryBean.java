@@ -24,7 +24,7 @@ public class BraveRpcTrackerEngineFactoryBean implements FactoryBean<BraveRpcTra
         if (braveRpcTrackerEngine == null) {
             afterPropertiesSet();
         }
-        return null;
+        return braveRpcTrackerEngine;
     }
 
     @Override
