@@ -19,15 +19,23 @@ public class PreparedStatementInterceptor implements StatementInterceptorV2 {
 
     private final static String SERVICE_NAME_KEY = "zipkinServiceName";
 
-    static volatile ClientTracer clientTracer;
+    private final ThreadLocal<Long> startTimeMs = new ThreadLocal<>();
+
+    private static volatile ClientTracer clientTracer;
+
+    private static volatile Long longQueryMs;
+
+    public static void setLongQueryMs(Long longQueryMs) {
+        PreparedStatementInterceptor.longQueryMs = longQueryMs;
+    }
 
     public static void setClientTracer(final ClientTracer tracer) {
         clientTracer = tracer;
     }
 
+
     @Override
     public ResultSetInternalMethods preProcess(final String sql, final Statement interceptedStatement, final Connection connection) throws SQLException {
-
         ClientTracer clientTracer = PreparedStatementInterceptor.clientTracer;
         if (clientTracer != null) {
             final String sqlToLog;
@@ -35,6 +43,7 @@ public class PreparedStatementInterceptor implements StatementInterceptorV2 {
             if (interceptedStatement instanceof PreparedStatement) {
                 sqlToLog = ((PreparedStatement) interceptedStatement).getPreparedSql();
                 beginTrace(clientTracer, sqlToLog, connection);
+                startTimeMs.set(System.currentTimeMillis());
             }
         }
         return null;
@@ -45,20 +54,23 @@ public class PreparedStatementInterceptor implements StatementInterceptorV2 {
                                                 final Connection connection, final int warningCount, final boolean noIndexUsed, final boolean noGoodIndexUsed,
                                                 final SQLException statementException) throws SQLException {
         ClientTracer clientTracer = PreparedStatementInterceptor.clientTracer;
-        if (clientTracer != null) {
+        if (clientTracer != null && overtime()) {
             endTrace(clientTracer, warningCount, statementException);
         }
-
         return null;
+    }
+
+    private boolean overtime() {
+        Long now = System.currentTimeMillis();
+        return (now - startTimeMs.get()) > longQueryMs;
     }
 
     private void beginTrace(final ClientTracer tracer, final String sql, final Connection connection) throws SQLException {
         tracer.startNewSpan("query");
         tracer.submitBinaryAnnotation("executed.query", sql);
-
         try {
             setClientSent(tracer, connection);
-        } catch (Exception e) { // logging the server address is optional
+        } catch (Exception e) {
             tracer.setClientSent();
         }
     }
@@ -83,7 +95,6 @@ public class PreparedStatementInterceptor implements StatementInterceptorV2 {
                 serviceName += "-" + databaseName;
             }
         }
-
         tracer.setClientSent(ipv4, port, serviceName);
     }
 
