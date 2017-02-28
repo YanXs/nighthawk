@@ -1,4 +1,4 @@
-package com.nightawk.mysql;
+package com.nightawk.jdbc;
 
 import com.github.kristofa.brave.ClientTracer;
 import com.mysql.jdbc.*;
@@ -77,7 +77,7 @@ public class PreparedStatementInterceptor implements StatementInterceptorV2 {
 
     /**
      * MySQL exposes the host connecting to, but not the port. This attempts to get the port from the
-     * JDBC URL. Ex. 5555 from {@code jdbc:mysql://localhost:5555/isSampled}, or 3306 if absent.
+     * JDBC URL. Ex. 5555 from {@code jdbc:jdbc://localhost:5555/isSampled}, or 3306 if absent.
      */
     private void setClientSent(ClientTracer tracer, Connection connection) throws Exception {
         InetAddress address = Inet4Address.getByName(connection.getHost());
@@ -89,7 +89,7 @@ public class PreparedStatementInterceptor implements StatementInterceptorV2 {
         Properties props = connection.getProperties();
         String serviceName = props.getProperty(SERVICE_NAME_KEY);
         if (serviceName == null || "".equals(serviceName)) {
-            serviceName = "mysql";
+            serviceName = "jdbc";
             String databaseName = connection.getCatalog();
             if (databaseName != null && !"".equals(databaseName)) {
                 serviceName += "-" + databaseName;

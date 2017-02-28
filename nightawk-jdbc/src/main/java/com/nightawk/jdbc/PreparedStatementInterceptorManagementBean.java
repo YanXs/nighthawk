@@ -1,4 +1,4 @@
-package com.nightawk.mysql;
+package com.nightawk.jdbc;
 
 import com.github.kristofa.brave.ClientTracer;
 
@@ -6,7 +6,7 @@ import java.io.Closeable;
 import java.io.IOException;
 
 /**
- * copy from brave-mysql
+ * copy from brave-jdbc
  *
  * @author Xs
  */

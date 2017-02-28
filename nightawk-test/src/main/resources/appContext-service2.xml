@@ -57,7 +57,7 @@
         <property name="brave" ref="brave"/>
     </bean>
 
-    <bean class="com.nightawk.mysql.PreparedStatementInterceptorManagementBean" destroy-method="close">
+    <bean class="com.nightawk.jdbc.PreparedStatementInterceptorManagementBean" destroy-method="close">
         <constructor-arg value="#{brave.clientTracer()}"/>
     </bean>
 </beans>

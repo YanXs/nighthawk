@@ -87,26 +87,31 @@ public class BraveFactoryBean implements FactoryBean<Brave>, InitializingBean {
 
 
     private SpanCollector createSpanCollector() {
-        if (transport.equals("http")) {
-            HttpSpanCollector.Config.Builder builder = HttpSpanCollector.Config.builder();
-            builder.flushInterval(flushInterval);
-            String[] addresses = transportAddress.split(",");
-            String baseUrl = "http://" + addresses[0];
-            return HttpSpanCollector.create(baseUrl, builder.build(), DEFAULT_HANDLER);
-        } else if (transport.equals("kafka")) {
-            KafkaSpanCollector.Config.Builder builder = KafkaSpanCollector.Config.builder(transportAddress);
-            builder.flushInterval(flushInterval);
-            return KafkaSpanCollector.create(builder.build(), DEFAULT_HANDLER);
-        } else if (transport.equals("scribe")) {
-            ScribeSpanCollectorParams params = new ScribeSpanCollectorParams();
-            params.setMetricsHandler(DEFAULT_HANDLER);
-            String[] addresses = transportAddress.split(",");
-            String scribeUrl = addresses[0];
-            String host = scribeUrl.substring(0, scribeUrl.indexOf(":"));
-            String port = scribeUrl.substring(scribeUrl.indexOf(":") + 1);
-            return new ScribeSpanCollector(host, Integer.valueOf(port), params);
-        } else {
-            throw new IllegalArgumentException("unknown transport type, transport: " + transport);
+        String lowerTransport = transport.toLowerCase();
+        switch (lowerTransport) {
+            case "http": {
+                HttpSpanCollector.Config.Builder builder = HttpSpanCollector.Config.builder();
+                builder.flushInterval(flushInterval);
+                String[] addresses = transportAddress.split(",");
+                String baseUrl = "http://" + addresses[0];
+                return HttpSpanCollector.create(baseUrl, builder.build(), DEFAULT_HANDLER);
+            }
+            case "kafka": {
+                KafkaSpanCollector.Config.Builder builder = KafkaSpanCollector.Config.builder(transportAddress);
+                builder.flushInterval(flushInterval);
+                return KafkaSpanCollector.create(builder.build(), DEFAULT_HANDLER);
+            }
+            case "scribe": {
+                ScribeSpanCollectorParams params = new ScribeSpanCollectorParams();
+                params.setMetricsHandler(DEFAULT_HANDLER);
+                String[] addresses = transportAddress.split(",");
+                String scribeUrl = addresses[0];
+                String host = scribeUrl.substring(0, scribeUrl.indexOf(":"));
+                String port = scribeUrl.substring(scribeUrl.indexOf(":") + 1);
+                return new ScribeSpanCollector(host, Integer.valueOf(port), params);
+            }
+            default:
+                throw new IllegalArgumentException("unknown transport type, transport: " + transport);
         }
     }
 
@@ -117,12 +122,14 @@ public class BraveFactoryBean implements FactoryBean<Brave>, InitializingBean {
             if (StringUtils.isEmpty(sampleRate)) {
                 return Sampler.ALWAYS_SAMPLE;
             }
-            if (sampler.equals("counting")) {
-                return CountingSampler.create(Float.valueOf(sampleRate));
-            } else if (sampler.equals("boundary")) {
-                return BoundarySampler.create(Float.valueOf(sampleRate));
-            } else {
-                throw new IllegalArgumentException("unknown sampler type, sampler: " + sampler);
+            String lowerSampler = sampler.toLowerCase();
+            switch (lowerSampler) {
+                case "counting":
+                    return CountingSampler.create(Float.valueOf(sampleRate));
+                case "boundary":
+                    return BoundarySampler.create(Float.valueOf(sampleRate));
+                default:
+                    throw new IllegalArgumentException("unknown sampler type, sampler: " + sampler);
             }
         }
     }
