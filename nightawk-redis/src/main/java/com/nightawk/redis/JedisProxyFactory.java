@@ -54,7 +54,7 @@ public class JedisProxyFactory implements PooledObjectFactory<Jedis> {
     }
 
     private void createProxyClass() {
-        proxyClass = ProxyClassBuilder.build(Jedis.class, JedisMethodExclusion.INSTANCE, new JedisInterceptor());
+        proxyClass = ProxyClassBuilder.build(Jedis.class, "Jedis", JedisMethodExclusion.INSTANCE, new JedisInterceptor());
     }
 
     public void setHostAndPort(final HostAndPort hostAndPort) {
@@ -104,7 +104,6 @@ public class JedisProxyFactory implements PooledObjectFactory<Jedis> {
         final BinaryJedis jedis = pooledJedis.getObject();
         try {
             HostAndPort hostAndPort = this.hostAndPort.get();
-
             String connectionHost = jedis.getClient().getHost();
             int connectionPort = jedis.getClient().getPort();
 

@@ -4,7 +4,7 @@ import com.nightawk.test.entity.Employee;
 
 import java.util.List;
 
-public class FirstServiceImpl implements FirstService{
+public class FirstServiceImpl implements FirstService {
 
     private SecondService secondService;
 
@@ -14,7 +14,7 @@ public class FirstServiceImpl implements FirstService{
 
     @Override
     public Employee getEmployee(Integer id) {
-        return null;
+        return secondService.getEmployee(id);
     }
 
     @Override

@@ -16,20 +16,26 @@ public class ProxyClassBuilder {
 
     private static final ConcurrentMap<Class<?>, Class<?>> classCache = new ConcurrentHashMap<>();
 
-    public static <T> Class<?> build(Class<T> origin, MethodExclusion methodExclusion, Object interceptor) {
+    private static final String DEFAULT_PREFIX = "BuddyProxy$";
+
+    public static <T> Class<?> build(Class<T> origin, String name, MethodExclusion methodExclusion, Object interceptor) {
         DynamicType.Builder<T> builder = new ByteBuddy()
-                .subclass(origin);
+                .subclass(origin).name(proxyClassName(name));
         Class<?> cachedClass = classCache.get(origin);
         if (cachedClass != null) {
             return cachedClass;
         }
         Class<? extends T> proxied = builder
-                .method(ElementMatchers.not(methodExclusion.getExclusionMethod()))
+                .method(methodExclusion.getExclusionMethod())
                 .intercept(MethodDelegation.to(interceptor))
                 .make()
                 .load(ProxyClassBuilder.class.getClassLoader(), ClassLoadingStrategy.Default.WRAPPER)
                 .getLoaded();
         classCache.putIfAbsent(origin, proxied);
         return proxied;
+    }
+
+    private static String proxyClassName(String name) {
+        return DEFAULT_PREFIX + name;
     }
 }

@@ -7,6 +7,14 @@
         http://code.alibabatech.com/schema/dubbo
         http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
 
+    <bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="locations">
+            <list>
+                <value>classpath:jdbc.properties</value>
+            </list>
+        </property>
+    </bean>
+
     <dubbo:application name="simpleService2"/>
 
     <dubbo:registry address="zookeeper://127.0.0.1:2181" client="curator"/>
@@ -35,7 +43,7 @@
 
     <bean id="mysqlConfigurer1" class="org.mybatis.spring.mapper.MapperScannerConfigurer">
         <property name="sqlSessionFactoryBeanName" value="datasourceMySqlSessionFactory1"/>
-        <property name="basePackage" value="demo.service"/>
+        <property name="basePackage" value="com.nightawk.test.service"/>
         <property name="annotationClass" value="org.springframework.stereotype.Component"/>
     </bean>
 

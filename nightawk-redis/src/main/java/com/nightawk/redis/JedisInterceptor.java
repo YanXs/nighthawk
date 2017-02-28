@@ -2,10 +2,7 @@ package com.nightawk.redis;
 
 import com.github.kristofa.brave.ClientTracer;
 import com.nightawk.core.intercept.ByteBuddyInterceptor;
-import net.bytebuddy.implementation.bind.annotation.AllArguments;
-import net.bytebuddy.implementation.bind.annotation.Origin;
-import net.bytebuddy.implementation.bind.annotation.SuperCall;
-import net.bytebuddy.implementation.bind.annotation.This;
+import net.bytebuddy.implementation.bind.annotation.*;
 import redis.clients.jedis.Jedis;
 
 import java.lang.reflect.Method;
@@ -30,18 +27,21 @@ public class JedisInterceptor implements ByteBuddyInterceptor {
         return reference.get();
     }
 
+    @RuntimeType
     public Object intercept(@SuperCall Callable<?> superMethod, @Origin Method method, @AllArguments Object[] args, @This Object me) {
-        if (!(superMethod instanceof Jedis)) {
-            throw new IllegalStateException("superMethod must be subClass of Jedis");
+        ClientTracer clientTracer = getClientTracer();
+        if (clientTracer != null) {
+            beginTrace(getClientTracer(), superMethod, method);
         }
-        beginTrace(getClientTracer(), superMethod, method);
         Exception exception = null;
         try {
             return superMethod.call();
         } catch (Exception e) {
             exception = e;
         } finally {
-            endTrace(getClientTracer(), exception);
+            if (getClientTracer() != null) {
+                endTrace(getClientTracer(), exception);
+            }
         }
         return null;
     }

@@ -18,6 +18,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
+ * Copy from JedisSentinelPool, replace JedisFactory with JedisProxyFactory
+ *
  * @author Xs.
  */
 public class JedisProxySentinelPool extends Pool<Jedis> {
@@ -131,32 +133,23 @@ public class JedisProxySentinelPool extends Pool<Jedis> {
     }
 
     private HostAndPort initSentinels(Set<String> sentinels, final String masterName) {
-
         HostAndPort master = null;
         boolean sentinelAvailable = false;
-
         log.info("Trying to find master from available Sentinels...");
-
         for (String sentinel : sentinels) {
             final HostAndPort hap = toHostAndPort(Arrays.asList(sentinel.split(":")));
-
             log.fine("Connecting to Sentinel " + hap);
-
             Jedis jedis = null;
             try {
                 jedis = new Jedis(hap.getHost(), hap.getPort());
-
                 List<String> masterAddr = jedis.sentinelGetMasterAddrByName(masterName);
-
                 // connected to sentinel...
                 sentinelAvailable = true;
-
                 if (masterAddr == null || masterAddr.size() != 2) {
                     log.warning("Can not get master addr, master name: " + masterName + ". Sentinel: " + hap
                             + ".");
                     continue;
                 }
-
                 master = toHostAndPort(masterAddr);
                 log.fine("Found Redis master at " + master);
                 break;

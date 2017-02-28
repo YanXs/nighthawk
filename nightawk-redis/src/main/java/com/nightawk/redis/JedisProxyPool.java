@@ -103,5 +103,4 @@ public class JedisProxyPool extends Pool<Jedis> {
         jedis.setDataSource(this);
         return jedis;
     }
-
 }
