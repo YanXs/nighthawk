@@ -61,7 +61,7 @@ public class TracingInterceptor implements Interceptor {
 
     private void mergeParsers(Map<String, DBUrlParser> parsers) {
         for (Map.Entry<String, DBUrlParser> entry : parsers.entrySet()) {
-            parsers.put(entry.getKey(), entry.getValue());
+            this.parsers.put(entry.getKey(), entry.getValue());
         }
     }
 

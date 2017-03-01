@@ -31,7 +31,7 @@ public class JedisInterceptor implements ByteBuddyInterceptor {
     public Object intercept(@SuperCall Callable<?> superMethod, @Origin Method method, @AllArguments Object[] args, @This Object me) {
         ClientTracer clientTracer = getClientTracer();
         if (clientTracer != null) {
-            beginTrace(getClientTracer(), superMethod, method);
+            beginTrace(getClientTracer(), (Jedis) me, method);
         }
         Exception exception = null;
         try {
@@ -46,11 +46,11 @@ public class JedisInterceptor implements ByteBuddyInterceptor {
         return null;
     }
 
-    private void beginTrace(final ClientTracer tracer, Callable<?> superMethod, Method method) {
-        tracer.startNewSpan("execute.redis.command");
+    private void beginTrace(final ClientTracer tracer, Jedis jedis, Method method) {
+        tracer.startNewSpan("redis.command");
         tracer.submitBinaryAnnotation("executed.command", method.getName());
         try {
-            setClientSent(tracer, (Jedis) superMethod);
+            setClientSent(tracer, jedis);
         } catch (Exception e) {
             tracer.setClientSent();
         }
@@ -60,7 +60,7 @@ public class JedisInterceptor implements ByteBuddyInterceptor {
         InetAddress address = Inet4Address.getByName(jedis.getClient().getHost());
         int ipv4 = ByteBuffer.wrap(address.getAddress()).getInt();
         int port = jedis.getClient().getPort();
-        String serviceName = "redis" + jedis.getClient().getDB();
+        String serviceName = "redis-DB" + jedis.getClient().getDB();
         clientTracer.setClientSent(ipv4, port, serviceName);
     }
 

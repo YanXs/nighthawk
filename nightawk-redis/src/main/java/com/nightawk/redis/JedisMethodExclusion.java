@@ -23,6 +23,7 @@ public class JedisMethodExclusion implements MethodExclusion {
                 .or(ObjectMethodElementMatchers.INSTANCE)
                 .or(named("close"))
                 .or(named("getDB"))
+                .or(named("getClient"))
                 .or(named("connect"))
                 .or(named("setDataSource"))
                 .or(named("resetState"))
