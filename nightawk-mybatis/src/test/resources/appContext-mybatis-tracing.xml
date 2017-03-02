@@ -6,13 +6,13 @@
     <bean id="datasourceMySqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
         <property name="dataSource" ref="dataSource_oracle"/>
         <property name="plugins">
-            <bean class="com.nightawk.mybatis.TracingInterceptor">
+            <bean class="net.nightawk.mybatis.TracingInterceptor">
                 <property name="clientTracer" value="#{brave.clientTracer()}"/>
             </bean>
         </property>
     </bean>
 
-    <bean id="brave" class="com.nightawk.core.brave.BraveFactoryBean">
+    <bean id="brave" class="net.nightawk.core.brave.BraveFactoryBean">
         <property name="serviceName" value="mybatis-tracing"/>
         <property name="transport" value="http"/>
         <property name="transportAddress" value="127.0.0.1:9411"/>

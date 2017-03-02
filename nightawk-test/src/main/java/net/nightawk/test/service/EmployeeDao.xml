@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="net.nightawk.test.service.EmployeeDao">
+
+    <resultMap id="BaseResultMap" type="net.nightawk.test.entity.Employee">
+        <result column="id" property="id" jdbcType="INTEGER"/>
+        <result column="name" property="name" jdbcType="VARCHAR"/>
+        <result column="zip" property="zip" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <select id="getEmployees" resultMap="BaseResultMap">
+        SELECT ID, NAME, ZIP from employee
+    </select>
+
+    <select id="getEmployee" resultType="net.nightawk.test.entity.Employee">
+        SELECT ID, NAME, ZIP from employee WHERE id = #{id}
+    </select>
+
+</mapper>
