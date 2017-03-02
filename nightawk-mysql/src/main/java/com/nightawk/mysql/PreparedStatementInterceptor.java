@@ -1,4 +1,4 @@
-package com.nightawk.jdbc;
+package com.nightawk.mysql;
 
 import com.github.kristofa.brave.ClientTracer;
 import com.mysql.jdbc.*;
@@ -23,11 +23,6 @@ public class PreparedStatementInterceptor implements StatementInterceptorV2 {
 
     private static volatile ClientTracer clientTracer;
 
-    private static volatile Long longQueryMs;
-
-    public static void setLongQueryMs(Long longQueryMs) {
-        PreparedStatementInterceptor.longQueryMs = longQueryMs;
-    }
 
     public static void setClientTracer(final ClientTracer tracer) {
         clientTracer = tracer;
@@ -54,15 +49,10 @@ public class PreparedStatementInterceptor implements StatementInterceptorV2 {
                                                 final Connection connection, final int warningCount, final boolean noIndexUsed, final boolean noGoodIndexUsed,
                                                 final SQLException statementException) throws SQLException {
         ClientTracer clientTracer = PreparedStatementInterceptor.clientTracer;
-        if (clientTracer != null && overtime()) {
+        if (clientTracer != null) {
             endTrace(clientTracer, warningCount, statementException);
         }
         return null;
-    }
-
-    private boolean overtime() {
-        Long now = System.currentTimeMillis();
-        return (now - startTimeMs.get()) > longQueryMs;
     }
 
     private void beginTrace(final ClientTracer tracer, final String sql, final Connection connection) throws SQLException {

@@ -2,7 +2,6 @@ package com.nightawk.test;
 
 import com.nightawk.test.entity.Employee;
 import com.nightawk.test.service.FirstService;
-import com.nightawk.test.service.FirstServiceImpl;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import java.io.IOException;
@@ -13,8 +12,9 @@ public class Consumer {
         ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("appContext-consumer.xml");
         context.start();
         FirstService firstService = (FirstService) context.getBean("service1");
-        Employee employee = firstService.getEmployee(1);
-        System.out.println(employee.getName());
+        for (int i = 0; i < 10000; i++) {
+            Employee employee = firstService.getEmployee(1);
+        }
         System.in.read();
     }
 }

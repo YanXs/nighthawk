@@ -26,7 +26,7 @@ public class TestJedisProxyPool {
     @Test
     public void test_jedis_tracer() throws Exception {
         Brave.Builder builder = new Brave.Builder("jedis-interceptor-test");
-        builder.spanCollector(HttpSpanCollector.create("http://192.168.150.132:9411", new EmptySpanCollectorMetricsHandler()));
+        builder.spanCollector(HttpSpanCollector.create("http://localhost:9411", new EmptySpanCollectorMetricsHandler()));
         builder.traceSampler(Sampler.ALWAYS_SAMPLE);
         Brave brave = builder.build();
         JedisInterceptor.setClientTracer(brave.clientTracer());

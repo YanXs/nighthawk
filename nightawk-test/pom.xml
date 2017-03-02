@@ -16,19 +16,25 @@
         <dependency>
             <groupId>xs</groupId>
             <artifactId>nightawk-core</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
             <groupId>xs</groupId>
             <artifactId>nightawk-dubbo</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
             <groupId>xs</groupId>
             <artifactId>nightawk-mysql</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>xs</groupId>
+            <artifactId>nightawk-redis</artifactId>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>

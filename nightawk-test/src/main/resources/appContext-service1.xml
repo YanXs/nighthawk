@@ -1,20 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns:dubbo="http://code.alibabatech.com/schema/dubbo" xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
         http://www.springframework.org/schema/beans/spring-beans.xsd
         http://code.alibabatech.com/schema/dubbo
-        http://code.alibabatech.com/schema/dubbo/dubbo.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
+        http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
 
-    <dubbo:application name="simpleService1" />
+    <dubbo:application name="simpleService1"/>
 
     <dubbo:registry address="zookeeper://127.0.0.1:2181" client="curator"/>
 
-    <dubbo:tracker address="zipkin://127.0.0.1:9411" transport="http" samplerate="1.0"/>
+    <dubbo:tracker protocol="zipkin" ref="braveRpcTrackerEngine"/>
 
     <bean id="service1" class="com.nightawk.test.service.FirstServiceImpl">
         <property name="secondService" ref="service2"/>
+        <property name="jedisProxyPool" ref="jedisPool"/>
     </bean>
 
     <!-- provider-->
@@ -22,7 +23,43 @@
 
     <dubbo:protocol name="hessian" port="8890" client="okHttpClient"/>
 
-    <dubbo:service interface="com.nightawk.test.service.FirstService" ref="service1" protocol="dubbo" cluster="failover" timeout="5000"/>
+    <dubbo:service interface="com.nightawk.test.service.FirstService" ref="service1" protocol="dubbo" cluster="failover"
+                   timeout="5000"/>
 
     <dubbo:reference id="service2" interface="com.nightawk.test.service.SecondService" check="false"/>
+
+
+    <bean id="brave" class="com.nightawk.core.brave.BraveFactoryBean">
+        <property name="serviceName" value="simpleService1"/>
+        <property name="transport" value="http"/>
+        <property name="transportAddress" value="127.0.0.1:9411"/>
+    </bean>
+
+    <bean id="braveRpcTrackerEngine" class="com.nightawk.dubbo.spring.BraveRpcTrackerEngineFactoryBean">
+        <property name="brave" ref="brave"/>
+    </bean>
+
+    <!-- jedis-->
+    <bean id="jedisPoolConfig" class="redis.clients.jedis.JedisPoolConfig">
+        <property name="maxTotal" value="500"/>
+        <property name="minIdle" value="50"/>
+        <property name="maxIdle" value="100"/>
+     </bean>
+
+    <!--<bean id="jedisPool" class="com.nightawk.redis.JedisProxyPool">-->
+        <!--<constructor-arg index="0" ref="jedisPoolConfig"/>-->
+        <!--<constructor-arg index="1" value="127.0.0.1"/>-->
+        <!--<constructor-arg index="2" value="6379" type="int"/>-->
+    <!--</bean>-->
+
+    <bean id="jedisPool" class="redis.clients.jedis.JedisPool">
+        <constructor-arg index="0" ref="jedisPoolConfig"/>
+        <constructor-arg index="1" value="127.0.0.1"/>
+        <constructor-arg index="2" value="6379" type="int"/>
+    </bean>
+
+    <bean class="com.nightawk.redis.JedisInterceptorManagementBean" destroy-method="close">
+        <constructor-arg value="#{brave.clientTracer()}"/>
+    </bean>
+
 </beans>
