@@ -1,8 +1,8 @@
 package net.nightawk.redis;
 
 import com.github.kristofa.brave.ClientTracer;
-import net.nightawk.core.intercept.ByteBuddyInterceptor;
 import net.bytebuddy.implementation.bind.annotation.*;
+import net.nightawk.core.intercept.ByteBuddyInterceptor;
 import redis.clients.jedis.Jedis;
 
 import java.lang.reflect.Method;
@@ -15,7 +15,7 @@ import java.util.concurrent.atomic.AtomicReference;
 /**
  * @author Xs.
  */
-public class JedisInterceptor implements ByteBuddyInterceptor {
+public class JaRedisInterceptor implements ByteBuddyInterceptor {
 
     private static final AtomicReference<ClientTracer> reference = new AtomicReference<>(null);
 
@@ -38,12 +38,12 @@ public class JedisInterceptor implements ByteBuddyInterceptor {
             return superMethod.call();
         } catch (Exception e) {
             exception = e;
+            throw new JaRedisCallException("Call superMethod error.", e);
         } finally {
             if (getClientTracer() != null) {
                 endTrace(getClientTracer(), exception);
             }
         }
-        return null;
     }
 
     private void beginTrace(final ClientTracer tracer, Jedis jedis, Method method) {
@@ -60,7 +60,7 @@ public class JedisInterceptor implements ByteBuddyInterceptor {
         InetAddress address = Inet4Address.getByName(jedis.getClient().getHost());
         int ipv4 = ByteBuffer.wrap(address.getAddress()).getInt();
         int port = jedis.getClient().getPort();
-        String serviceName = "redis-DB" + jedis.getClient().getDB();
+        String serviceName = "redis-DB-" + jedis.getClient().getDB();
         clientTracer.setClientSent(ipv4, port, serviceName);
     }
 

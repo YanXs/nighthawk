@@ -12,9 +12,9 @@ import static net.bytebuddy.matcher.ElementMatchers.not;
 /**
  * @author Xs.
  */
-public class JedisMethodExclusion implements MethodExclusion {
+public class JaRedisMethodExclusion implements MethodExclusion {
 
-    public static final JedisMethodExclusion INSTANCE = new JedisMethodExclusion();
+    public static final JaRedisMethodExclusion INSTANCE = new JaRedisMethodExclusion();
 
     @Override
     @SuppressWarnings("unchecked")

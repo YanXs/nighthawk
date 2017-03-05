@@ -5,7 +5,7 @@ import com.github.kristofa.brave.EmptySpanCollectorMetricsHandler;
 import com.github.kristofa.brave.Sampler;
 import com.github.kristofa.brave.http.HttpSpanCollector;
 import net.nightawk.redis.JaRedis;
-import net.nightawk.redis.JedisInterceptor;
+import net.nightawk.redis.JaRedisInterceptor;
 import net.nightawk.redis.JaRedisPool;
 import org.junit.Assert;
 import org.junit.Test;
@@ -43,7 +43,7 @@ public class TestJedisProxyPool {
         builder.spanCollector(HttpSpanCollector.create("http://localhost:9411", new EmptySpanCollectorMetricsHandler()));
         builder.traceSampler(Sampler.ALWAYS_SAMPLE);
         Brave brave = builder.build();
-        JedisInterceptor.setClientTracer(brave.clientTracer());
+        JaRedisInterceptor.setClientTracer(brave.clientTracer());
 
         JedisPoolConfig config = new JedisPoolConfig();
         JaRedisPool proxyPool = new JaRedisPool(config, "127.0.0.1", 6379);

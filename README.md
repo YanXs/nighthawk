@@ -1,7 +1,6 @@
 # nightawk
 
-nightawk是一个分布式服务追踪框架，利用[Zipkin](http://zipkin.io/)收集分布式链路数据并以瀑布图的形式展示，
-
+nightawk是一个分布式服务追踪框架，利用[Zipkin](http://zipkin.io/)收集分布式链路数据并以瀑布图的形式展示，Zipkin提供多种客户端,nightawk使用java客户端[brave](https://github.com/openzipkin/brave)
 nightawk提供多种插件：
 
 ## 目前支持的插件
@@ -74,6 +73,27 @@ JaRedisPool pool = new JaRedisPool(config, "127.0.0.1", 6379);
 Jedis jedis = pool.getResource();
 jedis.set("hello", "world");
 ```
+
+* nightawk-mysql
+如果项目中没有使用mybatis框架，对于mysql数据库可以利用MYSQL-JDBC中的StatementInterceptorV2机制拦截statement的执行，nightawk-mysql代码与
+[brave-mysql](https://github.com/openzipkin/brave)相同，稍作修改的地方是只关心PreparedStatement的执行情况
+
+```xml
+<bean id="brave" class="net.nightawk.core.brave.BraveFactoryBean">
+    <property name="serviceName" value="simpleService2"/>
+    <property name="transport" value="http"/>
+    <property name="transportAddress" value="127.0.0.1:9411"/>
+</bean>
+
+<bean id="braveRpcTrackerEngine" class="net.nightawk.dubbo.spring.BraveRpcTrackerEngineFactoryBean">
+    <property name="brave" ref="brave"/>
+</bean>
+
+<bean class="net.nightawk.mysql.PreparedStatementInterceptorManagementBean" destroy-method="close">
+    <constructor-arg value="#{brave.clientTracer()}"/>
+</bean>
+```
+修改URL: database.url=jdbc:mysql://127.0.0.1:3306/test?statementInterceptors=com.nightawk.mysql.PreparedStatementInterceptor
 
 
 
