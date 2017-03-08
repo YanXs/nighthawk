@@ -1,0 +1,62 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
+    <bean id="datasourceMySqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource_mysql"/>
+        <property name="plugins">
+            <bean class="net.nightawk.sphex.mybatis.TracingInterceptor">
+                <property name="statementTracer" ref="statementTracer"/>
+            </bean>
+        </property>
+    </bean>
+
+    <bean id="brave" class="net.nightawk.core.brave.BraveFactoryBean">
+        <property name="serviceName" value="mybatis-tracing"/>
+        <property name="transport" value="http"/>
+        <property name="transportAddress" value="192.168.150.132:9411"/>
+    </bean>
+
+    <bean id="statementTracer" class="net.nightawk.sphex.StatementTracer">
+        <property name="clientTracer" value="#{brave.clientTracer()}"/>
+    </bean>
+
+    <bean id="dataSource_mysql" class="org.apache.commons.dbcp.BasicDataSource">
+        <property name="driverClassName" value="com.mysql.jdbc.Driver"/>
+        <property name="url" value="jdbc:mysql://127.0.0.1:3306/test?autoReconnect=true"/>
+        <property name="username" value="root"/>
+        <property name="password" value="root"/>
+        <property name="maxActive" value="80"/>
+        <property name="maxIdle" value="20"/>
+        <property name="maxWait" value="3000"/>
+    </bean>
+
+
+    <bean id="dataSource_mysql_c3p0" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
+        <property name="driverClass" value="com.mysql.jdbc.Driver"/>
+        <property name="jdbcUrl" value="jdbc:mysql://127.0.0.1:3306/test?autoReconnect=true"/>
+        <property name="user" value="root"/>
+        <property name="password" value="root"/>
+        <property name="initialPoolSize" value="5"/>
+        <property name="maxIdleTime" value="7"/>
+        <property name="maxPoolSize" value="10"/>
+        <property name="minPoolSize" value="1"/>
+    </bean>
+
+    <bean id="dataSource_oracle" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
+        <property name="driverClass" value="oracle.jdbc.driver.OracleDriver"/>
+        <property name="jdbcUrl" value="jdbc:oracle:thin:@10.16.0.109:1521:TADB"/>
+        <property name="user" value="ta_5"/>
+        <property name="password" value="ta_5"/>
+        <property name="initialPoolSize" value="5"/>
+        <property name="maxIdleTime" value="7"/>
+        <property name="maxPoolSize" value="10"/>
+        <property name="minPoolSize" value="1"/>
+    </bean>
+
+    <bean id="mysqlConfigurer" class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="sqlSessionFactoryBeanName" value="datasourceMySqlSessionFactory"/>
+        <property name="basePackage" value="net.nightawk.test"/>
+    </bean>
+</beans>

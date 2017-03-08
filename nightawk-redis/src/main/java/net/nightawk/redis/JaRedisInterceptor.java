@@ -47,8 +47,8 @@ public class JaRedisInterceptor implements ByteBuddyInterceptor {
     }
 
     private void beginTrace(final ClientTracer tracer, Jedis jedis, Method method) {
-        tracer.startNewSpan("redis.command");
-        tracer.submitBinaryAnnotation("executed.command", method.getName());
+        tracer.startNewSpan("redis");
+        tracer.submitBinaryAnnotation("execute.command", method.getName());
         try {
             setClientSent(tracer, jedis);
         } catch (Exception e) {

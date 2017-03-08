@@ -16,4 +16,19 @@
         SELECT ID, NAME, ZIP from employee WHERE id = #{id}
     </select>
 
+    <insert id="insert" parameterType="net.nightawk.test.entity.Employee">
+        INSERT INTO employee VALUES (#{id}, #{name}, #{zip})
+    </insert>
+
+    <insert id="batchInsert" parameterType="list">
+        INSERT INTO employee
+        VALUES
+        <foreach collection="list" separator="," index="index" item="employee">
+            (
+            #{employee.id},
+            #{employee.name},
+            #{employee.zip}
+            )
+        </foreach>
+    </insert>
 </mapper>

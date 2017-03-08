@@ -13,4 +13,7 @@ public interface EmployeeDao {
 
     List<Employee> getEmployees();
 
+    void insert(Employee employee);
+
+    void batchInsert(List<Employee> employees);
 }
