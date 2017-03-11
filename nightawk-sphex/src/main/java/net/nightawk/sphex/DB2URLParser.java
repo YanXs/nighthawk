@@ -3,13 +3,11 @@ package net.nightawk.sphex;
 import java.net.URI;
 
 /**
- * MysqlURLParser to parse mysql jdbc url
- * <p/>
- * jdbc:mysql://localhost:3306/test?useUnicode=true
- * <or/>
- * jdbc:mysql://localhost:3306/test
+ * jdbc:db2://192.168.0.2:50000/test
+ *
+ * @author Xs.
  */
-public class MysqlURLParser extends AbstractURLParser {
+public class DB2URLParser extends AbstractURLParser {
 
     @Override
     public URLCapsule parse(String url) {

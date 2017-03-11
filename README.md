@@ -5,9 +5,11 @@ nightawk提供多种插件：
 
 ## 目前支持的插件
 * nightawk-dubbo 该插件提供[dubbo3](https://github.com/YanXs/dubbo3)框架链路追踪的功能，具体开启方式见[dubbo3](https://github.com/YanXs/dubbo3)教程
-* nightawk-mybatis 插件利用mybatis Interceptor机制提供数据库查询监控功能
 * nightawk-redis 该插件提供redis调用监控功能
-* nightawk-mysql 该插件提供mysql数据库查询监控功能，如果程序中使用了mybatis推荐使用nightawk-mybatis(不可重复使用)
+* nightawk-sphex 该插件提供如下几种方式监控数据库读写
+    nightawk-mybatis 利用mybatis Interceptor机制提供数据库查询监控功能
+    nightawk-mysql   提供mysql数据库查询监控功能，如果程序中使用了mybatis推荐使用nightawk-mybatis(不可重复使用)
+    nightawk-druid   利用[druid](https://github.com/alibaba/druid)数据源Filter机制，实现TracingFilter监控数据库(与nightawk-mybatis不可重复使用)
 
 ##使用方法
 * nightawk-dubbo
@@ -37,26 +39,6 @@ night-dubbo没有使用dubbo2的Filter做扩展，Filter不够灵活，所以我
 ```
 方式二在外部创建了brave，整个应用可以共享brave，可以收集方法内部的数据库请求等
 
-* nightawk-mybatis
-nightawk-mybatis利用mybatis的Interceptor实现扩展点，详见TracingInterceptor类，目前支持mysql、oracle、DB2 SQL查询和更新时间，
-如果要支持支持其他数据库需要扩展DBUrlParser
-
-```xml
-<bean id="datasourceMySqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
-    <property name="dataSource" ref="dataSource_oracle"/>
-     <property name="plugins">
-        <bean class="net.nightawk.mybatis.TracingInterceptor">
-            <property name="clientTracer" value="#{brave.clientTracer()}"/>
-        </bean>
-     </property>
-</bean>
-
-<bean id="brave" class="net.nightawk.core.brave.BraveFactoryBean">
-    <property name="serviceName" value="mybatis-tracing"/>
-    <property name="transport" value="http"/>
-    <property name="transportAddress" value="127.0.0.1:9411"/>
-</bean>
-```
 * nightawk-redis
 nightawk-redis使用[Byte Buddy](http://bytebuddy.net/#/)代理机制拦截jedis的请求，详见JedisInterceptor。类JaRedisFactory代替JedisFactory，
 JaRedisPool代替JedisPool，JaRedisSentinelPool代替JedisSentinelPool实现
@@ -74,26 +56,84 @@ Jedis jedis = pool.getResource();
 jedis.set("hello", "world");
 ```
 
+* nightawk-mybatis
+nightawk-mybatis利用mybatis的Interceptor实现扩展点，详见TracingInterceptor类，目前支持mysql、oracle、DB2 SQL查询和更新时间，
+如果要支持支持其他数据库需要扩展DBUrlParser
+
+```xml
+<bean id="datasourceMySqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+    <property name="dataSource" ref="dataSource_oracle"/>
+     <property name="plugins">
+        <bean class="net.nightawk.sphex.mybatis.TracingInterceptor">
+            <property name="statementTracer" ref="statementTracer"/>
+        </bean>
+     </property>
+</bean>
+
+<bean id="statementTracer" class="net.nightawk.sphex.StatementTracer">
+    <property name="clientTracer" value="#{brave.clientTracer()}"/>
+</bean>
+   
+<bean id="brave" class="net.nightawk.core.brave.BraveFactoryBean">
+    <property name="serviceName" value="mybatis-tracing"/>
+    <property name="transport" value="http"/>
+    <property name="transportAddress" value="127.0.0.1:9411"/>
+</bean>
+```
+
 * nightawk-mysql
 如果项目中没有使用mybatis框架，对于mysql数据库可以利用MYSQL-JDBC中的StatementInterceptorV2机制拦截statement的执行，nightawk-mysql代码与
 [brave-mysql](https://github.com/openzipkin/brave)相同，稍作修改的地方是只关心PreparedStatement的执行情况
 
 ```xml
 <bean id="brave" class="net.nightawk.core.brave.BraveFactoryBean">
-    <property name="serviceName" value="simpleService2"/>
+    <property name="serviceName" value="mybatis-tracing"/>
     <property name="transport" value="http"/>
-    <property name="transportAddress" value="127.0.0.1:9411"/>
+    <property name="transportAddress" value="192.168.150.132:9411"/>
 </bean>
 
-<bean id="braveRpcTrackerEngine" class="net.nightawk.dubbo.spring.BraveRpcTrackerEngineFactoryBean">
-    <property name="brave" ref="brave"/>
+<bean id="statementTracer" class="net.nightawk.sphex.StatementTracer">
+    <property name="clientTracer" value="#{brave.clientTracer()}"/>
 </bean>
-
-<bean class="net.nightawk.mysql.PreparedStatementInterceptorManagementBean" destroy-method="close">
-    <constructor-arg value="#{brave.clientTracer()}"/>
+    
+<bean id="preparedStatementInterceptor" class="net.nightawk.sphex.mysql.PreparedStatementInterceptor">
+    <property name="statementTracer" ref="statementTracer"/>
 </bean>
 ```
 修改URL: database.url=jdbc:mysql://127.0.0.1:3306/test?statementInterceptors=com.nightawk.mysql.PreparedStatementInterceptor
+
+* nightawk-druid
+如果项目中使用[druid](https://github.com/alibaba/druid)作为数据源，可以使用TracingFilter监控追踪数据库
+
+```xml
+<bean id="brave" class="net.nightawk.core.brave.BraveFactoryBean">
+    <property name="serviceName" value="mybatis-tracing"/>
+    <property name="transport" value="http"/>
+    <property name="transportAddress" value="192.168.150.132:9411"/>
+</bean>
+
+<bean id="statementTracer" class="net.nightawk.sphex.StatementTracer">
+    <property name="clientTracer" value="#{brave.clientTracer()}"/>
+</bean>
+
+<bean id="dataSource_mysql" class="com.alibaba.druid.pool.DruidDataSource" init-method="init"
+          destroy-method="close">
+    <property name="driverClassName" value="com.mysql.jdbc.Driver"/>
+    <property name="url" value="jdbc:mysql://127.0.0.1:3306/test?autoReconnect=true"/>
+    <property name="username" value="root"/>
+    <property name="password" value="root"/>
+    <property name="proxyFilters">
+        <list>
+           <ref bean="tracingFilter"/>
+        </list>
+    </property>
+</bean>
+
+<bean id="tracingFilter" class="net.nightawk.sphex.druid.TracingFilter">
+    <property name="statementTracer" ref="statementTracer"/>
+</bean>
+```
+
 
 
 

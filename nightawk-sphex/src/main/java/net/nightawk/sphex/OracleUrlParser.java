@@ -1,17 +1,23 @@
 package net.nightawk.sphex;
 
 /**
- * OracleUrlParser to parse oracle url
+ * OracleURLParser to parse oracle url
  * jdbc:oracle:thin:@127.0.0.1:1521:MYDB
  */
-public class OracleUrlParser extends AbstractDBUrlParser {
+public class OracleURLParser extends AbstractURLParser {
 
     @Override
-    public void parse(String url) {
-        String address = url.substring(url.indexOf("@") + 1);
-        String[] strings = address.split(":");
-        host = strings[0];
-        port = Integer.valueOf(strings[1]);
-        dataBase = strings[2];
+    public URLCapsule parse(String url) {
+        URLCapsule urlCapsule = URL_CAPSULES.get(url);
+        if (urlCapsule == null) {
+            String address = url.substring(url.indexOf("@") + 1);
+            String[] strings = address.split(":");
+            String host = strings[0];
+            int port = Integer.valueOf(strings[1]);
+            String dataBase = strings[2];
+            urlCapsule = new URLCapsule(host, port, dataBase);
+            URL_CAPSULES.putIfAbsent(url, urlCapsule);
+        }
+        return urlCapsule;
     }
 }

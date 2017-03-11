@@ -1,0 +1,19 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
+    <bean id="brave" class="net.nightawk.core.brave.BraveFactoryBean">
+        <property name="serviceName" value="mybatis-tracing"/>
+        <property name="transport" value="http"/>
+        <property name="transportAddress" value="192.168.150.132:9411"/>
+    </bean>
+
+    <bean id="statementTracer" class="net.nightawk.sphex.StatementTracer">
+        <property name="clientTracer" value="#{brave.clientTracer()}"/>
+    </bean>
+
+    <bean id="preparedStatementInterceptor" class="net.nightawk.sphex.mysql.PreparedStatementInterceptor">
+        <property name="statementTracer" ref="statementTracer"/>
+    </bean>
+</beans>

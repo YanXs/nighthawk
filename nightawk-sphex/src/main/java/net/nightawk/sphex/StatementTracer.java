@@ -15,26 +15,27 @@ public class StatementTracer {
 
     private volatile ClientTracer clientTracer;
 
-    private Map<String, DBUrlParser> parsers;
+    private Map<String, URLParser> parsers;
 
     public StatementTracer() {
         parsers = new HashMap<>();
-        parsers.put("mysql", new MysqlUrlParser());
-        parsers.put("oracle", new OracleUrlParser());
+        parsers.put("mysql", new MysqlURLParser());
+        parsers.put("oracle", new OracleURLParser());
+        parsers.put("db2", new DB2URLParser());
     }
 
     public void setClientTracer(ClientTracer clientTracer) {
         this.clientTracer = clientTracer;
     }
 
-    public void setParsers(Map<String, DBUrlParser> parsers) {
+    public void setParsers(Map<String, URLParser> parsers) {
         if (!parsers.isEmpty()) {
             mergeParsers(parsers);
         }
     }
 
-    private void mergeParsers(Map<String, DBUrlParser> parsers) {
-        for (Map.Entry<String, DBUrlParser> entry : parsers.entrySet()) {
+    private void mergeParsers(Map<String, URLParser> parsers) {
+        for (Map.Entry<String, URLParser> entry : parsers.entrySet()) {
             this.parsers.put(entry.getKey(), entry.getValue());
         }
     }
@@ -48,16 +49,16 @@ public class StatementTracer {
             try {
                 String afterJDBC = url.substring(5); // jdbc:
                 String scheme = afterJDBC.substring(0, afterJDBC.indexOf(":"));
-                DBUrlParser parser = parsers.get(scheme);
+                URLParser parser = parsers.get(scheme);
                 if (parser == null) {
                     throw new IllegalStateException("unknown db scheme: " + scheme);
                 }
-                parser.parse(url);
-                String serviceName = scheme + "-" + parser.getDataBase();
-                InetAddress address = Inet4Address.getByName(parser.getHost());
+                URLCapsule urlCapsule = parser.parse(url);
+                String serviceName = scheme + "-" + urlCapsule.getDataBase();
+                InetAddress address = Inet4Address.getByName(urlCapsule.getHost());
                 clientTracer.startNewSpan(scheme);
                 clientTracer.submitBinaryAnnotation("execute.sql", sql);
-                setClientSent(address, parser.getPort(), serviceName);
+                setClientSent(address, urlCapsule.getPort(), serviceName);
             } catch (Exception e) {
                 clientTracer.setClientSent();
             }
