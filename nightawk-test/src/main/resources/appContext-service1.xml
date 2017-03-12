@@ -7,7 +7,7 @@
         http://code.alibabatech.com/schema/dubbo
         http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
 
-    <dubbo:application name="simpleService1"/>
+    <dubbo:application name="simpleService1" destroy-method="close"/>
 
     <dubbo:registry address="zookeeper://127.0.0.1:2181" client="curator"/>
 
@@ -46,17 +46,17 @@
         <property name="maxIdle" value="100"/>
      </bean>
 
-    <!--<bean id="jedisPool" class="JaRedisPool">-->
-        <!--<constructor-arg index="0" ref="jedisPoolConfig"/>-->
-        <!--<constructor-arg index="1" value="127.0.0.1"/>-->
-        <!--<constructor-arg index="2" value="6379" type="int"/>-->
-    <!--</bean>-->
-
-    <bean id="jedisPool" class="redis.clients.jedis.JedisPool">
+    <bean id="jedisPool" class="net.nightawk.redis.JaRedisPool">
         <constructor-arg index="0" ref="jedisPoolConfig"/>
         <constructor-arg index="1" value="127.0.0.1"/>
         <constructor-arg index="2" value="6379" type="int"/>
     </bean>
+
+    <!--<bean id="jedisPool" class="redis.clients.jedis.JedisPool">-->
+        <!--<constructor-arg index="0" ref="jedisPoolConfig"/>-->
+        <!--<constructor-arg index="1" value="127.0.0.1"/>-->
+        <!--<constructor-arg index="2" value="6379" type="int"/>-->
+    <!--</bean>-->
 
     <bean class="net.nightawk.redis.JaRedisInterceptorManagementBean" destroy-method="close">
         <constructor-arg value="#{brave.clientTracer()}"/>

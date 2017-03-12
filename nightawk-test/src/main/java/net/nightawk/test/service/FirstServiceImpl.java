@@ -1,5 +1,6 @@
 package net.nightawk.test.service;
 
+import net.nightawk.redis.JaRedisPool;
 import net.nightawk.test.entity.Employee;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
@@ -8,11 +9,11 @@ import java.util.List;
 
 public class FirstServiceImpl implements FirstService {
 
-    private JedisPool jedisProxyPool;
+    private JaRedisPool jedisProxyPool;
 
     private SecondService secondService;
 
-    public void setJedisProxyPool(JedisPool jedisProxyPool) {
+    public void setJedisProxyPool(JaRedisPool jedisProxyPool) {
         this.jedisProxyPool = jedisProxyPool;
     }
 

@@ -56,8 +56,4 @@
     <bean id="braveRpcTrackerEngine" class="net.nightawk.dubbo.spring.BraveRpcTrackerEngineFactoryBean">
         <property name="brave" ref="brave"/>
     </bean>
-
-    <bean class="PreparedStatementInterceptorManagementBean" destroy-method="close">
-        <constructor-arg value="#{brave.clientTracer()}"/>
-    </bean>
 </beans>

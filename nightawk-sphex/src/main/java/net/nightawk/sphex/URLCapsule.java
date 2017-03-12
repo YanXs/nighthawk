@@ -1,9 +1,13 @@
 package net.nightawk.sphex;
 
+import java.util.concurrent.ConcurrentHashMap;
+
 /**
  * @author Xs.
  */
 public class URLCapsule {
+
+    static final ConcurrentHashMap<String, URLCapsule> URL_CAPSULES = new ConcurrentHashMap<>();
 
     private final String host;
 
