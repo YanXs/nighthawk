@@ -7,17 +7,17 @@ package net.nightawk.sphex;
 public class OracleURLParser implements URLParser {
 
     @Override
-    public URLCapsule parse(String url) {
-        URLCapsule urlCapsule = URLCapsule.URL_CAPSULES.get(url);
-        if (urlCapsule == null) {
+    public DatabaseURL parse(String url) {
+        DatabaseURL databaseUrl = DatabaseURL.DATABASE_URLS.get(url);
+        if (databaseUrl == null) {
             String address = url.substring(url.indexOf("@") + 1);
             String[] strings = address.split(":");
             String host = strings[0];
             int port = Integer.valueOf(strings[1]);
             String dataBase = strings[2];
-            urlCapsule = new URLCapsule(host, port, dataBase);
-            URLCapsule.URL_CAPSULES.putIfAbsent(url, urlCapsule);
+            databaseUrl = new DatabaseURL(host, port, dataBase);
+            DatabaseURL.DATABASE_URLS.putIfAbsent(url, databaseUrl);
         }
-        return urlCapsule;
+        return databaseUrl;
     }
 }

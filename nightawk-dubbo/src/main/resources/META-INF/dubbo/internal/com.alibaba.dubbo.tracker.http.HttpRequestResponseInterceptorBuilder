@@ -1,1 +1,1 @@
-zipkin=BraveOkHttpRequestResponseInterceptorBuilder
+zipkin=net.nightawk.dubbo.protocol.http.BraveOkHttpRequestResponseInterceptorBuilder

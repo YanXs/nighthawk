@@ -53,12 +53,12 @@ public class StatementTracer {
                 if (parser == null) {
                     throw new IllegalStateException("unknown db scheme: " + scheme);
                 }
-                URLCapsule urlCapsule = parser.parse(url);
-                String serviceName = scheme + "-" + urlCapsule.getDataBase();
-                InetAddress address = Inet4Address.getByName(urlCapsule.getHost());
+                DatabaseURL databaseUrl = parser.parse(url);
+                String serviceName = scheme + "-" + databaseUrl.getDataBase();
+                InetAddress address = Inet4Address.getByName(databaseUrl.getHost());
                 clientTracer.startNewSpan(scheme);
                 clientTracer.submitBinaryAnnotation("execute.sql", sql);
-                setClientSent(address, urlCapsule.getPort(), serviceName);
+                setClientSent(address, databaseUrl.getPort(), serviceName);
             } catch (Exception e) {
                 clientTracer.setClientSent();
             }

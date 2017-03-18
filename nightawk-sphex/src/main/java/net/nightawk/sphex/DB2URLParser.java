@@ -10,16 +10,16 @@ import java.net.URI;
 public class DB2URLParser implements URLParser {
 
     @Override
-    public URLCapsule parse(String url) {
-        URLCapsule urlCapsule = URLCapsule.URL_CAPSULES.get(url);
-        if (urlCapsule == null) {
+    public DatabaseURL parse(String url) {
+        DatabaseURL databaseUrl = DatabaseURL.DATABASE_URLS.get(url);
+        if (databaseUrl == null) {
             URI uri = URI.create(url.substring(5)); // strip "jdbc:"
             String host = uri.getHost();
             int port = uri.getPort();
             String dataBase = uri.getPath().substring(1); // path "/test"
-            urlCapsule = new URLCapsule(host, port, dataBase);
-            URLCapsule.URL_CAPSULES.putIfAbsent(url, urlCapsule);
+            databaseUrl = new DatabaseURL(host, port, dataBase);
+            DatabaseURL.DATABASE_URLS.putIfAbsent(url, databaseUrl);
         }
-        return urlCapsule;
+        return databaseUrl;
     }
 }

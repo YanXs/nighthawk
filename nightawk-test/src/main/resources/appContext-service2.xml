@@ -29,6 +29,15 @@
 
     <bean id="datasourceMySqlSessionFactory1" class="org.mybatis.spring.SqlSessionFactoryBean">
         <property name="dataSource" ref="dataSource_mysql1"/>
+        <property name="plugins">
+            <bean class="net.nightawk.sphex.mybatis.TracingInterceptor">
+                <property name="statementTracer" ref="statementTracer"/>
+            </bean>
+        </property>
+    </bean>
+
+    <bean id="statementTracer" class="net.nightawk.sphex.StatementTracer">
+        <property name="clientTracer" value="#{brave.clientTracer()}"/>
     </bean>
 
     <bean id="dataSource_mysql1" class="org.apache.commons.dbcp.BasicDataSource">
@@ -36,21 +45,22 @@
         <property name="url" value="${database.url}"/>
         <property name="username" value="${database.userName}"/>
         <property name="password" value="root"/>
-        <property name="maxActive" value="10"/>
+        <property name="initialSize" value="25"/>
+        <property name="maxActive" value="100"/>
         <property name="maxIdle" value="5"/>
-        <property name="maxWait" value="3000"/>
+        <property name="maxWait" value="30000"/>
     </bean>
 
     <bean id="mysqlConfigurer1" class="org.mybatis.spring.mapper.MapperScannerConfigurer">
         <property name="sqlSessionFactoryBeanName" value="datasourceMySqlSessionFactory1"/>
-        <property name="basePackage" value="com.nightawk.test.service"/>
+        <property name="basePackage" value="net.nightawk.test.service"/>
         <property name="annotationClass" value="org.springframework.stereotype.Component"/>
     </bean>
 
     <bean id="brave" class="net.nightawk.core.brave.BraveFactoryBean">
         <property name="serviceName" value="simpleService2"/>
         <property name="transport" value="http"/>
-        <property name="transportAddress" value="127.0.0.1:9411"/>
+        <property name="transportAddress" value="192.168.150.133:9411"/>
     </bean>
 
     <bean id="braveRpcTrackerEngine" class="net.nightawk.dubbo.spring.BraveRpcTrackerEngineFactoryBean">

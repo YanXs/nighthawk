@@ -5,9 +5,9 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * @author Xs.
  */
-public class URLCapsule {
+public class DatabaseURL {
 
-    static final ConcurrentHashMap<String, URLCapsule> URL_CAPSULES = new ConcurrentHashMap<>();
+    static final ConcurrentHashMap<String, DatabaseURL> DATABASE_URLS = new ConcurrentHashMap<>();
 
     private final String host;
 
@@ -15,7 +15,7 @@ public class URLCapsule {
 
     private final String dataBase;
 
-    public URLCapsule(String host, int port, String dataBase) {
+    public DatabaseURL(String host, int port, String dataBase) {
         this.host = host;
         this.port = port;
         this.dataBase = dataBase;

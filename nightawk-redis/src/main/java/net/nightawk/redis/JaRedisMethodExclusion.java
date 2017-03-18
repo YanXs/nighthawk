@@ -28,6 +28,8 @@ public class JaRedisMethodExclusion implements MethodExclusion {
                 .or(named("setDataSource"))
                 .or(named("resetState"))
                 .or(named("clusterSlots"))
+                .or(named("isConnected"))
+                .or(named("ping"))
                 .or(named("checkIsInMultiOrPipeline")));
     }
 }

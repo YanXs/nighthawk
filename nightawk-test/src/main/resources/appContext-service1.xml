@@ -32,7 +32,7 @@
     <bean id="brave" class="net.nightawk.core.brave.BraveFactoryBean">
         <property name="serviceName" value="simpleService1"/>
         <property name="transport" value="http"/>
-        <property name="transportAddress" value="127.0.0.1:9411"/>
+        <property name="transportAddress" value="192.168.150.133:9411"/>
     </bean>
 
     <bean id="braveRpcTrackerEngine" class="net.nightawk.dubbo.spring.BraveRpcTrackerEngineFactoryBean">
@@ -51,12 +51,6 @@
         <constructor-arg index="1" value="127.0.0.1"/>
         <constructor-arg index="2" value="6379" type="int"/>
     </bean>
-
-    <!--<bean id="jedisPool" class="redis.clients.jedis.JedisPool">-->
-        <!--<constructor-arg index="0" ref="jedisPoolConfig"/>-->
-        <!--<constructor-arg index="1" value="127.0.0.1"/>-->
-        <!--<constructor-arg index="2" value="6379" type="int"/>-->
-    <!--</bean>-->
 
     <bean class="net.nightawk.redis.JaRedisInterceptorManagementBean" destroy-method="close">
         <constructor-arg value="#{brave.clientTracer()}"/>

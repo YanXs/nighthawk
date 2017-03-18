@@ -23,7 +23,7 @@ night-dubbo没有使用dubbo2的Filter做扩展，Filter不够灵活，所以我
 ```
 方式一在dubbo内部创建brave收集调用数据，无法收集方法内的数据请求或者redis请求；
 
-方式二：
+方式二(推荐)：
 ```xml
 <dubbo:tracker protocol="zipkin" ref="braveRpcTrackerEngine"/>
 

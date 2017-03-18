@@ -3,9 +3,9 @@ package net.nightawk.test.service;
 import net.nightawk.redis.JaRedisPool;
 import net.nightawk.test.entity.Employee;
 import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPool;
 
 import java.util.List;
+import java.util.UUID;
 
 public class FirstServiceImpl implements FirstService {
 
@@ -24,7 +24,12 @@ public class FirstServiceImpl implements FirstService {
     @Override
     public Employee getEmployee(Integer id) {
         Jedis jedis = jedisProxyPool.getResource();
-        jedis.hgetAll(String.valueOf(id));
+        jedis.append(UUID.randomUUID().toString(), UUID.randomUUID().toString());
+        try {
+            Thread.sleep(50);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         return secondService.getEmployee(id);
     }
 

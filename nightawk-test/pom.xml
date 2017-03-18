@@ -27,7 +27,7 @@
 
         <dependency>
             <groupId>net.nightawk</groupId>
-            <artifactId>nightawk-mysql</artifactId>
+            <artifactId>nightawk-sphex</artifactId>
             <version>${project.version}</version>
         </dependency>
 
