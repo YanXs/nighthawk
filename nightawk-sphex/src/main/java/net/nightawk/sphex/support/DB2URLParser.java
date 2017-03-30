@@ -1,4 +1,4 @@
-package net.nightawk.sphex;
+package net.nightawk.sphex.support;
 
 import java.net.URI;
 

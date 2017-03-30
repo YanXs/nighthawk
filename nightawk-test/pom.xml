@@ -5,13 +5,12 @@
     <parent>
         <artifactId>nighthawk-parent</artifactId>
         <groupId>net.nightawk</groupId>
-        <version>1.0-SNAPSHOT</version>
+        <version>1.0.0.RELEASE</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>nightawk-test</artifactId>
-
-
+    
     <dependencies>
         <dependency>
             <groupId>net.nightawk</groupId>

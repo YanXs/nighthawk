@@ -15,14 +15,18 @@
     <bean id="brave" class="net.nightawk.core.brave.BraveFactoryBean">
         <property name="serviceName" value="mybatis-tracing"/>
         <property name="transport" value="http"/>
-        <property name="transportAddress" value="192.168.150.132:9411"/>
+        <property name="transportAddress" value="127.0.0.1:9411"/>
     </bean>
 
     <bean id="statementTracer" class="net.nightawk.sphex.StatementTracer">
         <property name="clientTracer" value="#{brave.clientTracer()}"/>
     </bean>
 
-    <bean id="dataSource_mysql" class="org.apache.commons.dbcp.BasicDataSource">
+    <bean id="dataSource_mysql" class="net.nightawk.sphex.mybatis.BasicDataSourceAdapter">
+        <constructor-arg ref="dataSource_mysql_origin"/>
+    </bean>
+
+    <bean id="dataSource_mysql_origin" class="org.apache.commons.dbcp.BasicDataSource">
         <property name="driverClassName" value="com.mysql.jdbc.Driver"/>
         <property name="url" value="jdbc:mysql://127.0.0.1:3306/test?autoReconnect=true"/>
         <property name="username" value="root"/>
@@ -57,6 +61,6 @@
 
     <bean id="mysqlConfigurer" class="org.mybatis.spring.mapper.MapperScannerConfigurer">
         <property name="sqlSessionFactoryBeanName" value="datasourceMySqlSessionFactory"/>
-        <property name="basePackage" value="net.nightawk.test"/>
+        <property name="basePackage" value="net.nightawk.sphex.test"/>
     </bean>
 </beans>

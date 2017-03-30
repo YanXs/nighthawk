@@ -9,8 +9,6 @@ import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.ResultHandler;
 
-import javax.sql.DataSource;
-import java.sql.DatabaseMetaData;
 import java.sql.Statement;
 import java.util.Properties;
 
@@ -50,10 +48,8 @@ public class TracingInterceptor implements Interceptor {
     }
 
     private void beginTrace(String sql, Environment environment) throws Exception {
-        DataSource dataSource = environment.getDataSource();
-        DatabaseMetaData metaData = dataSource.getConnection().getMetaData();
-        String url = metaData.getURL();
-        statementTracer.beginTrace(sql, url);
+        AbstractDataSourceAdapter dataSource = (AbstractDataSourceAdapter) environment.getDataSource();
+        statementTracer.beginTrace(sql, dataSource.getUrl());
     }
 
     @Override
