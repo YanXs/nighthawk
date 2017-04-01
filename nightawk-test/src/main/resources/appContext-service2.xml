@@ -30,7 +30,7 @@
     <bean id="datasourceMySqlSessionFactory1" class="org.mybatis.spring.SqlSessionFactoryBean">
         <property name="dataSource" ref="dataSource_mysql1"/>
         <property name="plugins">
-            <bean class="net.nightawk.sphex.mybatis.TracingInterceptor">
+            <bean class="net.nightawk.sphex.mybatis.MybatisTracingInterceptor">
                 <property name="statementTracer" ref="statementTracer"/>
             </bean>
         </property>

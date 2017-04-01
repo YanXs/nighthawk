@@ -1,6 +1,6 @@
 package net.nightawk.redis;
 
-import net.nightawk.core.intercept.MethodExclusion;
+import net.nightawk.core.intercept.MethodInclusion;
 import net.nightawk.core.intercept.ObjectMethodElementMatchers;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.matcher.ElementMatcher;
@@ -12,13 +12,16 @@ import static net.bytebuddy.matcher.ElementMatchers.not;
 /**
  * @author Xs.
  */
-public class JaRedisMethodExclusion implements MethodExclusion {
+public class JaRedisMethodInclusion implements MethodInclusion {
 
-    public static final JaRedisMethodExclusion INSTANCE = new JaRedisMethodExclusion();
+    public static final MethodInclusion INSTANCE = new JaRedisMethodInclusion();
+
+    private JaRedisMethodInclusion(){
+    }
 
     @Override
     @SuppressWarnings("unchecked")
-    public ElementMatcher<MethodDescription> getExclusionMethod() {
+    public ElementMatcher<MethodDescription> getIncludes() {
         return not(ElementMatchers.<MethodDescription>isPrivate()
                 .or(ObjectMethodElementMatchers.INSTANCE)
                 .or(named("close"))

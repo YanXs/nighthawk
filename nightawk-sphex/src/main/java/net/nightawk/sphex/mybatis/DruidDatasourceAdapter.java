@@ -4,11 +4,11 @@ import com.alibaba.druid.pool.DruidDataSource;
 
 import javax.sql.DataSource;
 
-public class DruidDatasourceAdapter extends AbstractDataSourceAdapter {
+public class DruidDataSourceAdapter extends AbstractDataSourceAdapter {
 
     private final DruidDataSource druidDataSource;
 
-    public DruidDatasourceAdapter(DruidDataSource druidDataSource) {
+    public DruidDataSourceAdapter(DruidDataSource druidDataSource) {
         this.druidDataSource = druidDataSource;
     }
 

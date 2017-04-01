@@ -17,7 +17,7 @@ public class ProxyClassBuilder {
 
     private static final String DEFAULT_PREFIX = "BuddyProxy$";
 
-    public static <T> Class<?> build(Class<T> origin, String name, MethodExclusion methodExclusion, Object interceptor) {
+    public static <T> Class<?> build(Class<T> origin, String name, MethodInclusion methodInclusion, Object interceptor) {
         DynamicType.Builder<T> builder = new ByteBuddy()
                 .subclass(origin).name(proxyClassName(name));
         Class<?> cachedClass = classCache.get(origin);
@@ -25,7 +25,7 @@ public class ProxyClassBuilder {
             return cachedClass;
         }
         Class<? extends T> proxied = builder
-                .method(methodExclusion.getExclusionMethod())
+                .method(methodInclusion.getIncludes())
                 .intercept(MethodDelegation.to(interceptor))
                 .make()
                 .load(ProxyClassBuilder.class.getClassLoader(), ClassLoadingStrategy.Default.WRAPPER)

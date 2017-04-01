@@ -13,13 +13,13 @@ import java.sql.Statement;
 import java.util.Properties;
 
 /**
- * TracingInterceptor is a component to trace sql execution latency using mybatis Interceptor.
+ * MybatisTracingInterceptor is a component to trace sql execution latency using mybatis Interceptor.
  * It is recommended that you use spring-mybatis,and this interceptor is better to be the first in the interceptorChain
  * so that it could intercept at last
  */
 @Intercepts({@Signature(type = StatementHandler.class, method = "query", args = {Statement.class, ResultHandler.class}),
         @Signature(type = StatementHandler.class, method = "update", args = {Statement.class})})
-public class TracingInterceptor implements Interceptor {
+public class MybatisTracingInterceptor implements Interceptor {
 
     private StatementTracer statementTracer;
 
@@ -48,7 +48,10 @@ public class TracingInterceptor implements Interceptor {
     }
 
     private void beginTrace(String sql, Environment environment) throws Exception {
-        AbstractDataSourceAdapter dataSource = (AbstractDataSourceAdapter) environment.getDataSource();
+        if (!(environment.getDataSource() instanceof DataSourceAdapter)) {
+            throw new IllegalDataSourceException("datasource must be DataSourceAdapter");
+        }
+        DataSourceAdapter dataSource = (DataSourceAdapter) environment.getDataSource();
         statementTracer.beginTrace(sql, dataSource.getUrl());
     }
 

@@ -33,7 +33,7 @@
         </property>
     </bean>
 
-    <bean id="tracingFilter" class="net.nightawk.sphex.druid.TracingFilter">
+    <bean id="tracingFilter" class="net.nightawk.sphex.druid.DruidTracingFilter">
         <property name="statementTracer" ref="statementTracer"/>
     </bean>
 

@@ -9,7 +9,7 @@ import redis.clients.jedis.Protocol;
  */
 public class JaRedis {
 
-    static Class<?> proxyClass = ProxyClassBuilder.build(Jedis.class, "Jedis", JaRedisMethodExclusion.INSTANCE, new JaRedisInterceptor());
+    static Class<?> proxyClass = ProxyClassBuilder.build(Jedis.class, "Jedis", JaRedisMethodInclusion.INSTANCE, new JaRedisInterceptor());
 
     public static class Builder {
         private String host = Protocol.DEFAULT_HOST;

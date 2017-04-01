@@ -6,8 +6,8 @@ import net.bytebuddy.matcher.ElementMatcher;
 /**
  * @author Xs.
  */
-public interface MethodExclusion {
+public interface MethodInclusion {
 
-    ElementMatcher<MethodDescription> getExclusionMethod();
+    ElementMatcher<MethodDescription> getIncludes();
 
 }
