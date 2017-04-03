@@ -22,6 +22,7 @@ night-dubbo没有使用dubbo2的Filter做扩展，Filter不够灵活，所以我
 ```xml
 <dubbo:tracker address="zipkin://127.0.0.1:9411" transport="http" sampler="counting" samplerate="1.0" flushinterval="2"/>
 ```
+
 方式一的局限是在dubbo内部创建brave收集调用数据，无法收集方法内的数据请求或者redis请求的响应延迟；
 
 方式二(推荐)：
