@@ -1,27 +1,28 @@
 # nightawk
 
-nightawk是一个分布式服务追踪框架，利用[Zipkin](http://zipkin.io/)收集分布式链路数据并以瀑布图的形式展示，Zipkin提供多种客户端,nightawk使用java客户端[brave](https://github.com/openzipkin/brave)
+nightawk是一个分布式服务追踪框架，利用[Zipkin](http://zipkin.io/)收集分布式链路数据，以zipkin UI展示，Zipkin提供多种客户端,nightawk使用java客户端[brave](https://github.com/openzipkin/brave)收集数据
 nightawk提供多种插件：
 
 ## 目前支持的插件
 * nightawk-dubbo 该插件提供[dubbo3](https://github.com/YanXs/dubbo3)框架链路追踪的功能，具体开启方式见[dubbo3](https://github.com/YanXs/dubbo3)教程
 * nightawk-redis 该插件提供redis调用监控功能
-* nightawk-sphex 该插件提供如下几种方式监控数据库读写
-    nightawk-mybatis 利用mybatis Interceptor机制提供数据库查询监控功能
-    nightawk-mysql   提供mysql数据库查询监控功能，如果程序中使用了mybatis推荐使用nightawk-mybatis(不可重复使用)
-    nightawk-druid   利用[druid](https://github.com/alibaba/druid)数据源Filter机制，实现TracingFilter监控数据库(与nightawk-mybatis不可重复使用)
+* nightawk-sphex 该插件提供如下几种方式监控数据库
+    -- nightawk-mybatis 利用mybatis Interceptor机制提供数据库查询监控功能
+    -- nightawk-mysql   提供mysql数据库查询监控功能，如果程序中使用了mybatis推荐使用nightawk-mybatis(不可重复使用)
+    -- nightawk-druid   利用[druid](https://github.com/alibaba/druid)数据源Filter机制，实现TracingFilter监控数据库(与nightawk-mybatis不可重复使用)
 
 ##使用方法
 * nightawk-dubbo
 night-dubbo没有使用dubbo2的Filter做扩展，Filter不够灵活，所以我修改了dubbo2同步请求应答实现方式，并添加了Interceptor接口，[dubbo3](https://github.com/YanXs/dubbo3)
-通过Interceptor修改请求，由于nightawk使用[Zipkin](http://zipkin.io/)收集数据，dubbo协议请求对应BraveDubboClientRequestInterceptor等等，
+通过Interceptor修改请求，dubbo协议请求对应的Interceptor为BraveDubboClientRequestInterceptor
+
 在spring中配置方式
 
 方式一：
 ```xml
 <dubbo:tracker address="zipkin://127.0.0.1:9411" transport="http" sampler="counting" samplerate="1.0" flushinterval="2"/>
 ```
-方式一在dubbo内部创建brave收集调用数据，无法收集方法内的数据请求或者redis请求；
+方式一的局限是在dubbo内部创建brave收集调用数据，无法收集方法内的数据请求或者redis请求的响应延迟；
 
 方式二(推荐)：
 ```xml
@@ -39,7 +40,9 @@ night-dubbo没有使用dubbo2的Filter做扩展，Filter不够灵活，所以我
 ```
 方式二在外部创建了brave，整个应用可以共享brave，可以收集方法内部的数据库请求等
 
+
 * nightawk-redis
+
 nightawk-redis使用[Byte Buddy](http://bytebuddy.net/#/)代理机制拦截jedis的请求，详见JedisInterceptor。类JaRedisFactory代替JedisFactory，
 JaRedisPool代替JedisPool，JaRedisSentinelPool代替JedisSentinelPool实现
 
@@ -57,6 +60,7 @@ jedis.set("hello", "world");
 ```
 
 * nightawk-mybatis
+
 nightawk-mybatis利用mybatis的Interceptor实现扩展点，详见TracingInterceptor类，目前支持mysql、oracle、DB2 SQL查询和更新时间，
 如果要支持支持其他数据库需要扩展DBUrlParser
 
@@ -82,6 +86,7 @@ nightawk-mybatis利用mybatis的Interceptor实现扩展点，详见TracingInterc
 ```
 
 * nightawk-mysql
+
 如果项目中没有使用mybatis框架，对于mysql数据库可以利用MYSQL-JDBC中的StatementInterceptorV2机制拦截statement的执行，nightawk-mysql代码与
 [brave-mysql](https://github.com/openzipkin/brave)相同，稍作修改的地方是只关心PreparedStatement的执行情况
 
@@ -103,6 +108,7 @@ nightawk-mybatis利用mybatis的Interceptor实现扩展点，详见TracingInterc
 修改URL: database.url=jdbc:mysql://127.0.0.1:3306/test?statementInterceptors=com.nightawk.mysql.PreparedStatementInterceptor
 
 * nightawk-druid
+
 如果项目中使用[druid](https://github.com/alibaba/druid)作为数据源，可以使用TracingFilter监控追踪数据库
 
 ```xml
