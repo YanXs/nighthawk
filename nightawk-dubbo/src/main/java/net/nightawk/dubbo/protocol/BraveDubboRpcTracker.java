@@ -20,7 +20,8 @@ public class BraveDubboRpcTracker implements RpcTracker {
 
     public BraveDubboRpcTracker(BraveRpcTrackerEngine trackerEngine) {
         this.trackerEngine = trackerEngine;
-        this.clientRequestInterceptor = new BraveDubboClientRequestInterceptor(trackerEngine.clientRequestInterceptor());
+        this.clientRequestInterceptor = new BraveDubboClientRequestInterceptor(
+                trackerEngine.clientRequestInterceptor());
         this.clientResponseInterceptor = new BraveDubboClientResponseInterceptor(
                 trackerEngine.clientResponseInterceptor());
         this.serverRequestInterceptor = new BraveDubboServerRequestInterceptor(

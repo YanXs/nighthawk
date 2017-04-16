@@ -3,6 +3,7 @@ package net.nightawk.dubbo;
 import com.alibaba.dubbo.common.URL;
 import com.alibaba.dubbo.common.utils.StringUtils;
 import com.alibaba.dubbo.tracker.RpcTrackerEngine;
+import com.alibaba.dubbo.tracker.TraceIdReporter;
 import com.github.kristofa.brave.*;
 import com.github.kristofa.brave.http.HttpSpanCollector;
 import com.github.kristofa.brave.kafka.KafkaSpanCollector;
@@ -19,6 +20,8 @@ public class BraveRpcTrackerEngine implements RpcTrackerEngine {
 
     private final Brave brave;
 
+    private TraceIdReporter traceIdReporter;
+
     BraveRpcTrackerEngine(URL url) {
         Brave.Builder builder = new Brave.Builder(url.getParameter("application"));
         builder.spanCollector(createSpanCollector(url));
@@ -30,28 +33,36 @@ public class BraveRpcTrackerEngine implements RpcTrackerEngine {
         this.brave = brave;
     }
 
+    public void setTraceIdReporter(TraceIdReporter traceIdReporter) {
+        this.traceIdReporter = traceIdReporter;
+    }
+
     private SpanCollector createSpanCollector(URL url) {
         String transport = url.getParameter("transport", "http");
         Integer flushInterval = url.getParameter("flushinterval", 1);
-        if (transport.equals("http")) {
-            HttpSpanCollector.Config.Builder builder = HttpSpanCollector.Config.builder();
-            builder.flushInterval(flushInterval);
-            String baseUrl = "http://" + url.getHost() + ":" + url.getPort();
-            return HttpSpanCollector.create(baseUrl, builder.build(), DEFAULT_HANDLER);
-        } else if (transport.equals("kafka")) {
-            String address = url.getParameter("address");
-            if (StringUtils.isEmpty(address)) {
-                throw new IllegalArgumentException("transport address must not be null");
+        switch (transport) {
+            case "http": {
+                HttpSpanCollector.Config.Builder builder = HttpSpanCollector.Config.builder();
+                builder.flushInterval(flushInterval);
+                String baseUrl = "http://" + url.getHost() + ":" + url.getPort();
+                return HttpSpanCollector.create(baseUrl, builder.build(), DEFAULT_HANDLER);
             }
-            KafkaSpanCollector.Config.Builder builder = KafkaSpanCollector.Config.builder(address);
-            builder.flushInterval(flushInterval);
-            return KafkaSpanCollector.create(builder.build(), DEFAULT_HANDLER);
-        } else if (transport.equals("scribe")) {
-            ScribeSpanCollectorParams params = new ScribeSpanCollectorParams();
-            params.setMetricsHandler(DEFAULT_HANDLER);
-            return new ScribeSpanCollector(url.getHost(), url.getPort(), params);
-        } else {
-            throw new IllegalArgumentException("unknown transport type, transport: " + transport);
+            case "kafka": {
+                String address = url.getParameter("address");
+                if (StringUtils.isEmpty(address)) {
+                    throw new IllegalArgumentException("transport address must not be null");
+                }
+                KafkaSpanCollector.Config.Builder builder = KafkaSpanCollector.Config.builder(address);
+                builder.flushInterval(flushInterval);
+                return KafkaSpanCollector.create(builder.build(), DEFAULT_HANDLER);
+            }
+            case "scribe":
+                ScribeSpanCollectorParams params = new ScribeSpanCollectorParams();
+                params.setMetricsHandler(DEFAULT_HANDLER);
+                return new ScribeSpanCollector(url.getHost(), url.getPort(), params);
+            default:
+                throw new IllegalArgumentException("unknown transport type, transport: " + transport +
+                        ", supported transport: { http, kafka, scribe }");
         }
     }
 
@@ -64,12 +75,14 @@ public class BraveRpcTrackerEngine implements RpcTrackerEngine {
             if (StringUtils.isEmpty(rate)) {
                 return Sampler.ALWAYS_SAMPLE;
             }
-            if (sampler.equals("counting")) {
-                return CountingSampler.create(Float.valueOf(rate));
-            } else if (sampler.equals("boundary")) {
-                return BoundarySampler.create(Float.valueOf(rate));
-            } else {
-                throw new IllegalArgumentException("unknown sampler type, sampler: " + sampler);
+            switch (sampler) {
+                case "counting":
+                    return CountingSampler.create(Float.valueOf(rate));
+                case "boundary":
+                    return BoundarySampler.create(Float.valueOf(rate));
+                default:
+                    throw new IllegalArgumentException("unknown sampler type, sampler: " + sampler +
+                            ", supported sampler: { counting, boundary }");
             }
         }
     }
@@ -100,5 +113,10 @@ public class BraveRpcTrackerEngine implements RpcTrackerEngine {
     @Override
     public ServerResponseInterceptor serverResponseInterceptor() {
         return brave.serverResponseInterceptor();
+    }
+
+    @Override
+    public TraceIdReporter traceIdReporter() {
+        return traceIdReporter;
     }
 }

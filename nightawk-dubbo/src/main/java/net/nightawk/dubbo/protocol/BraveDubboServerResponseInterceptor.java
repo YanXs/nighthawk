@@ -21,5 +21,4 @@ public class BraveDubboServerResponseInterceptor implements ServerResponseInterc
             serverResponseInterceptor.handle((com.github.kristofa.brave.ServerResponseAdapter) serverResponseAdapter);
         }
     }
-
 }

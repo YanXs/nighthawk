@@ -35,8 +35,11 @@
         <property name="transportAddress" value="192.168.150.133:9411"/>
     </bean>
 
+    <bean id="traceIdWatcher" class="net.nightawk.dubbo.protocol.ThreadLocalTraceIdWatcher"/>
+
     <bean id="braveRpcTrackerEngine" class="net.nightawk.dubbo.spring.BraveRpcTrackerEngineFactoryBean">
         <property name="brave" ref="brave"/>
+        <property name="traceIdReporter" ref="traceIdWatcher"/>
     </bean>
 
     <!-- jedis-->
@@ -44,7 +47,7 @@
         <property name="maxTotal" value="500"/>
         <property name="minIdle" value="50"/>
         <property name="maxIdle" value="100"/>
-     </bean>
+    </bean>
 
     <bean id="jedisPool" class="net.nightawk.redis.JaRedisPool">
         <constructor-arg index="0" ref="jedisPoolConfig"/>
