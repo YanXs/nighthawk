@@ -14,6 +14,7 @@
     <dubbo:tracker protocol="zipkin" ref="braveRpcTrackerEngine"/>
 
     <bean id="service1" class="net.nightawk.test.service.FirstServiceImpl">
+        <property name="traceIdWatcher" ref="traceIdWatcher"/>
         <property name="secondService" ref="service2"/>
         <property name="jedisProxyPool" ref="jedisPool"/>
     </bean>
@@ -32,7 +33,7 @@
     <bean id="brave" class="net.nightawk.core.brave.BraveFactoryBean">
         <property name="serviceName" value="simpleService1"/>
         <property name="transport" value="http"/>
-        <property name="transportAddress" value="192.168.150.133:9411"/>
+        <property name="transportAddress" value="127.0.0.1:9411"/>
     </bean>
 
     <bean id="traceIdWatcher" class="net.nightawk.dubbo.protocol.ThreadLocalTraceIdWatcher"/>

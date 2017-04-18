@@ -28,7 +28,7 @@
     <bean id="service2" class="net.nightawk.test.service.SecondServiceImpl"/>
 
     <bean id="datasourceMySqlSessionFactory1" class="org.mybatis.spring.SqlSessionFactoryBean">
-        <property name="dataSource" ref="dataSource_mysql1"/>
+        <property name="dataSource" ref="dataSourceAdapter"/>
         <property name="plugins">
             <bean class="net.nightawk.sphex.mybatis.MybatisTracingInterceptor">
                 <property name="statementTracer" ref="statementTracer"/>
@@ -51,6 +51,10 @@
         <property name="maxWait" value="30000"/>
     </bean>
 
+    <bean id="dataSourceAdapter" class="net.nightawk.sphex.mybatis.BasicDataSourceAdapter">
+        <constructor-arg ref="dataSource_mysql1"/>
+    </bean>
+
     <bean id="mysqlConfigurer1" class="org.mybatis.spring.mapper.MapperScannerConfigurer">
         <property name="sqlSessionFactoryBeanName" value="datasourceMySqlSessionFactory1"/>
         <property name="basePackage" value="net.nightawk.test.service"/>
@@ -60,7 +64,7 @@
     <bean id="brave" class="net.nightawk.core.brave.BraveFactoryBean">
         <property name="serviceName" value="simpleService2"/>
         <property name="transport" value="http"/>
-        <property name="transportAddress" value="192.168.150.133:9411"/>
+        <property name="transportAddress" value="127.0.0.1:9411"/>
     </bean>
 
     <bean id="braveRpcTrackerEngine" class="net.nightawk.dubbo.spring.BraveRpcTrackerEngineFactoryBean">
