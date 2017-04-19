@@ -3,6 +3,8 @@ package net.nightawk.sphex;
 import com.github.kristofa.brave.ClientTracer;
 import net.nightawk.sphex.support.*;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.nio.ByteBuffer;
@@ -78,11 +80,18 @@ public class StatementTracer {
                     clientTracer.submitBinaryAnnotation("warning.count", warningCount);
                 }
                 if (throwable != null) {
-                    clientTracer.submitBinaryAnnotation("error.message", throwable.getMessage());
+                    clientTracer.submitBinaryAnnotation("error.message", traceThrowable(throwable));
                 }
             } finally {
                 clientTracer.setClientReceived();
             }
         }
+    }
+
+    private String traceThrowable(Throwable throwable) {
+        StringWriter stringWriter = new StringWriter(8096);
+        PrintWriter printWriter = new PrintWriter(stringWriter);
+        throwable.printStackTrace(printWriter);
+        return stringWriter.toString();
     }
 }

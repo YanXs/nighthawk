@@ -4,6 +4,7 @@ import org.apache.commons.dbcp.BasicDataSource;
 
 import javax.sql.DataSource;
 
+
 public class BasicDataSourceAdapter extends AbstractDataSourceAdapter {
 
     private final BasicDataSource basicDataSource;
