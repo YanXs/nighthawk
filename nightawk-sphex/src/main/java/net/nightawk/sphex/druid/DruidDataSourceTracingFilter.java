@@ -8,14 +8,14 @@ import net.nightawk.sphex.StatementTracer;
 /**
  * @author Xs.
  */
-public class DruidTracingFilter extends FilterEventAdapter {
+public class DruidDataSourceTracingFilter extends FilterEventAdapter {
 
     private StatementTracer statementTracer;
 
-    public DruidTracingFilter() {
+    public DruidDataSourceTracingFilter() {
     }
 
-    public DruidTracingFilter(StatementTracer statementTracer) {
+    public DruidDataSourceTracingFilter(StatementTracer statementTracer) {
         this.statementTracer = statementTracer;
     }
 

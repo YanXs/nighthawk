@@ -57,7 +57,7 @@
         <constructor-arg index="2" value="6379" type="int"/>
     </bean>
 
-    <bean class="net.nightawk.redis.JaRedisInterceptorManagementBean" destroy-method="close">
+    <bean class="net.nightawk.redis.JaRedisInterceptorMBean" destroy-method="close">
         <constructor-arg value="#{brave.clientTracer()}"/>
     </bean>
 

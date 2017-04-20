@@ -35,7 +35,7 @@
         <property name="clientTracer" value="#{brave.clientTracer()}"/>
     </bean>
 
-    <bean id="basicDataSourceInterceptor" class="net.nightawk.sphex.basic.BasicTracingInterceptor">
+    <bean id="basicDataSourceInterceptor" class="net.nightawk.sphex.basic.BasicDataSourceTracingInterceptor">
         <constructor-arg ref="statementTracer"/>
     </bean>
 

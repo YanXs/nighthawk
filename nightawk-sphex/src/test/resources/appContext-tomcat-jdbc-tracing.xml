@@ -4,41 +4,39 @@
         http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
 
     <bean id="datasourceMySqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
-        <property name="dataSource" ref="dataSource_mysql"/>
+        <property name="dataSource" ref="dataSource_tomcat_jdbc"/>
     </bean>
 
     <bean id="brave" class="net.nightawk.core.brave.BraveFactoryBean">
-        <property name="serviceName" value="mybatis-tracing"/>
+        <property name="serviceName" value="basic-tracing"/>
         <property name="transport" value="http"/>
-        <property name="transportAddress" value="192.168.150.132:9411"/>
+        <property name="transportAddress" value="127.0.0.1:9411"/>
     </bean>
 
     <bean id="statementTracer" class="net.nightawk.sphex.StatementTracer">
         <property name="clientTracer" value="#{brave.clientTracer()}"/>
     </bean>
 
-    <bean id="dataSource_mysql" class="com.alibaba.druid.pool.DruidDataSource" init-method="init"
-          destroy-method="close">
+    <bean id="tracingMBean" class="net.nightawk.sphex.tomcat.jdbc.TracingInterceptorMBean">
+        <constructor-arg ref="statementTracer"/>
+    </bean>
+
+    <bean id="dataSource_tomcat_jdbc" class="org.apache.tomcat.jdbc.pool.DataSource">
         <property name="driverClassName" value="com.mysql.jdbc.Driver"/>
         <property name="url" value="jdbc:mysql://127.0.0.1:3306/test?autoReconnect=true"/>
         <property name="username" value="root"/>
         <property name="password" value="root"/>
-        <property name="maxActive" value="10"/>
+        <property name="maxActive" value="80"/>
+        <property name="maxIdle" value="20"/>
         <property name="maxWait" value="3000"/>
-        <property name="filters" value="stat"/>
-        <property name="proxyFilters">
-            <list>
-                <ref bean="tracingFilter"/>
-            </list>
-        </property>
-    </bean>
-
-    <bean id="tracingFilter" class="net.nightawk.sphex.druid.DruidDataSourceTracingFilter">
-        <property name="statementTracer" ref="statementTracer"/>
+        <property name="testWhileIdle" value="true"/>
+        <property name="timeBetweenEvictionRunsMillis" value="60000"/>
+        <property name="numTestsPerEvictionRun" value="10"/>
+        <property name="jdbcInterceptors" value="net.nightawk.sphex.tomcat.jdbc.TomcatDataSourceTracingInterceptor"/>
     </bean>
 
     <bean id="mysqlConfigurer" class="org.mybatis.spring.mapper.MapperScannerConfigurer">
         <property name="sqlSessionFactoryBeanName" value="datasourceMySqlSessionFactory"/>
-        <property name="basePackage" value="net.nightawk.test"/>
+        <property name="basePackage" value="net.nightawk.sphex.test"/>
     </bean>
 </beans>

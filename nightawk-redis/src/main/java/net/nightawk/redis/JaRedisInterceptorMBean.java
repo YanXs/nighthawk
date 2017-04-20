@@ -8,9 +8,9 @@ import java.io.IOException;
 /**
  * @author Xs.
  */
-public class JaRedisInterceptorManagementBean implements Closeable {
+public class JaRedisInterceptorMBean implements Closeable {
 
-    public JaRedisInterceptorManagementBean(final ClientTracer tracer) {
+    public JaRedisInterceptorMBean(final ClientTracer tracer) {
         JaRedisInterceptor.setClientTracer(tracer);
     }
 

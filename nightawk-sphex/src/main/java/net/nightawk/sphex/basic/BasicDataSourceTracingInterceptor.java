@@ -4,14 +4,14 @@ import net.nightawk.sphex.StatementTracer;
 
 import java.sql.SQLException;
 
-public class BasicTracingInterceptor implements Interceptor {
+public class BasicDataSourceTracingInterceptor implements Interceptor {
 
     private StatementTracer statementTracer;
 
-    public BasicTracingInterceptor() {
+    public BasicDataSourceTracingInterceptor() {
     }
 
-    public BasicTracingInterceptor(StatementTracer statementTracer) {
+    public BasicDataSourceTracingInterceptor(StatementTracer statementTracer) {
         this.statementTracer = statementTracer;
     }
 
