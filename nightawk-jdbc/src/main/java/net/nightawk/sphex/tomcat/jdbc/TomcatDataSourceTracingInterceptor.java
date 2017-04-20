@@ -99,7 +99,7 @@ public class TomcatDataSourceTracingInterceptor extends AbstractCreateStatementI
                 error = t;
                 throw t;
             } finally {
-                if (tracer != null) {
+                if (process && tracer != null) {
                     tracer.endTrace(0, error);
                 }
             }
@@ -125,7 +125,7 @@ public class TomcatDataSourceTracingInterceptor extends AbstractCreateStatementI
             JdbcInterceptor interceptor = getNext();
             while (interceptor != null) {
                 if (interceptor instanceof ProxyConnection) {
-                    url = ((ProxyConnection) interceptor).getPool().getPoolProperties().getUrl();
+                    url = getUrlFromConnectionPool(((ProxyConnection) interceptor).getPool());
                     break;
                 }
                 interceptor = getNext();
@@ -138,9 +138,12 @@ public class TomcatDataSourceTracingInterceptor extends AbstractCreateStatementI
     }
 
     public void poolStarted(ConnectionPool pool) {
-        url = pool.getPoolProperties().getUrl();
+        url = getUrlFromConnectionPool(pool);
     }
 
+    private String getUrlFromConnectionPool(ConnectionPool pool){
+        return pool.getPoolProperties().getUrl();
+    }
     @Override
     public void closeInvoked() {
         // NOP
