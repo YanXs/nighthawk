@@ -5,6 +5,8 @@ import com.alibaba.dubbo.tracker.http.ServletFilter;
 import com.github.kristofa.brave.ServerRequestInterceptor;
 import com.github.kristofa.brave.ServerResponseInterceptor;
 import com.github.kristofa.brave.http.SpanNameProvider;
+import net.nightawk.dubbo.protocol.CertainTraceId;
+import net.nightawk.dubbo.protocol.Reportable;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;

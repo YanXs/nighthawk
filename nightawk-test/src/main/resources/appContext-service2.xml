@@ -21,26 +21,25 @@
 
     <dubbo:tracker protocol="zipkin" ref="braveRpcTrackerEngine"/>
 
-    <dubbo:protocol name="dubbo" port="20883"/>
+    <dubbo:protocol name="dubbo" port="20884"/>
 
     <dubbo:service interface="net.nightawk.test.service.SecondService" ref="service2" timeout="-1"/>
 
     <bean id="service2" class="net.nightawk.test.service.SecondServiceImpl"/>
 
     <bean id="datasourceMySqlSessionFactory1" class="org.mybatis.spring.SqlSessionFactoryBean">
-        <property name="dataSource" ref="dataSourceAdapter"/>
-        <property name="plugins">
-            <bean class="net.nightawk.sphex.mybatis.MybatisTracingInterceptor">
-                <property name="statementTracer" ref="statementTracer"/>
-            </bean>
-        </property>
+        <property name="dataSource" ref="dataSource_mysql1"/>
     </bean>
 
     <bean id="statementTracer" class="net.nightawk.sphex.StatementTracer">
         <property name="clientTracer" value="#{brave.clientTracer()}"/>
     </bean>
 
-    <bean id="dataSource_mysql1" class="org.apache.commons.dbcp.BasicDataSource">
+    <bean id="basicDataSourceInterceptor" class="net.nightawk.sphex.basic.BasicTracingInterceptor">
+        <constructor-arg ref="statementTracer"/>
+    </bean>
+
+    <bean id="dataSource_mysql1" class="net.nightawk.sphex.basic.SphexBasicDataSource" destroy-method="close">
         <property name="driverClassName" value="${database.driverClassName}"/>
         <property name="url" value="${database.url}"/>
         <property name="username" value="${database.userName}"/>
@@ -49,10 +48,11 @@
         <property name="maxActive" value="100"/>
         <property name="maxIdle" value="5"/>
         <property name="maxWait" value="30000"/>
-    </bean>
-
-    <bean id="dataSourceAdapter" class="net.nightawk.sphex.mybatis.BasicDataSourceAdapter">
-        <constructor-arg ref="dataSource_mysql1"/>
+        <property name="interceptors">
+            <list>
+                <ref bean="basicDataSourceInterceptor"/>
+            </list>
+        </property>
     </bean>
 
     <bean id="mysqlConfigurer1" class="org.mybatis.spring.mapper.MapperScannerConfigurer">

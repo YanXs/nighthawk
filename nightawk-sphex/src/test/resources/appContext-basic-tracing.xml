@@ -4,16 +4,11 @@
         http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
 
     <bean id="datasourceMySqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
-        <property name="dataSource" ref="dataSource_mysql"/>
-        <property name="plugins">
-            <bean class="net.nightawk.sphex.mybatis.MybatisTracingInterceptor">
-                <property name="statementTracer" ref="statementTracer"/>
-            </bean>
-        </property>
+        <property name="dataSource" ref="dataSource_mysql_origin"/>
     </bean>
 
     <bean id="brave" class="net.nightawk.core.brave.BraveFactoryBean">
-        <property name="serviceName" value="mybatis-tracing"/>
+        <property name="serviceName" value="basic-tracing"/>
         <property name="transport" value="http"/>
         <property name="transportAddress" value="127.0.0.1:9411"/>
     </bean>
@@ -26,10 +21,6 @@
         <constructor-arg ref="statementTracer"/>
     </bean>
 
-    <bean id="dataSource_mysql" class="net.nightawk.sphex.mybatis.BasicDataSourceAdapter">
-        <constructor-arg ref="dataSource_mysql_origin"/>
-    </bean>
-
     <bean id="dataSource_mysql_origin" class="net.nightawk.sphex.basic.SphexBasicDataSource">
         <property name="driverClassName" value="com.mysql.jdbc.Driver"/>
         <property name="url" value="jdbc:mysql://127.0.0.1:3306/test?autoReconnect=true"/>
@@ -38,30 +29,9 @@
         <property name="maxActive" value="80"/>
         <property name="maxIdle" value="20"/>
         <property name="maxWait" value="3000"/>
-        <property name="interceptors">
-            <list>
-                <ref bean="basicDataSourceInterceptor"/>
-            </list>
-        </property>
-    </bean>
-
-
-    <bean id="dataSource_mysql_c3p0" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
-        <property name="driverClass" value="com.mysql.jdbc.Driver"/>
-        <property name="jdbcUrl" value="jdbc:mysql://127.0.0.1:3306/test?autoReconnect=true"/>
-        <property name="user" value="root"/>
-        <property name="password" value="root"/>
-        <property name="initialPoolSize" value="5"/>
-        <property name="maxIdleTime" value="7"/>
-        <property name="maxPoolSize" value="10"/>
-        <property name="minPoolSize" value="1"/>
-    </bean>
-
-    <bean id="dataSource_oracle" class="net.nightawk.sphex.basic.SphexBasicDataSource" destroy-method="close">
-        <property name="driverClassName" value="oracle.jdbc.driver.OracleDriver"/>
-        <property name="url" value="jdbc:oracle:thin:@10.16.0.109:1521:TADB"/>
-        <property name="username" value="ta_5"/>
-        <property name="password" value="ta_5"/>
+        <property name="testWhileIdle" value="true"/>
+        <property name="timeBetweenEvictionRunsMillis" value="60000"/>
+        <property name="numTestsPerEvictionRun" value="10"/>
         <property name="interceptors">
             <list>
                 <ref bean="basicDataSourceInterceptor"/>

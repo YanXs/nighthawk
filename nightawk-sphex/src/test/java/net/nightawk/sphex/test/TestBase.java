@@ -13,7 +13,9 @@ public abstract class TestBase {
 
     @Test
     public void test_query_tracing() throws Exception {
-        employeeDao.getEmployees();
+        for (int i = 0; i < 10; i++) {
+            employeeDao.getEmployees();
+        }
     }
 
     @Test
@@ -22,6 +24,8 @@ public abstract class TestBase {
         e.setId(123);
         e.setName("hello");
         e.setZip("103203");
-        employeeDao.insert(e);
+        for (int i = 0; i < 10; i++) {
+            employeeDao.insert(e);
+        }
     }
 }

@@ -20,12 +20,13 @@
     </bean>
 
     <!-- provider-->
-    <dubbo:protocol name="dubbo" port="20884"/>
+    <dubbo:protocol name="dubbo" port="20883"/>
 
-    <dubbo:protocol name="hessian" port="8890" client="okHttpClient"/>
+    <!--<dubbo:protocol name="hessian" port="8890" client="okHttpClient"/>-->
 
     <dubbo:service interface="net.nightawk.test.service.FirstService" ref="service1" protocol="dubbo" cluster="failover"
-                   timeout="5000"/>
+                   timeout="5000">
+    </dubbo:service>
 
     <dubbo:reference id="service2" interface="net.nightawk.test.service.SecondService" check="false"/>
 
