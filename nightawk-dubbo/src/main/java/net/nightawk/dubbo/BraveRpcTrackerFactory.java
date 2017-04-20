@@ -2,8 +2,7 @@ package net.nightawk.dubbo;
 
 import com.alibaba.dubbo.common.URL;
 import com.alibaba.dubbo.tracker.*;
-import net.nightawk.dubbo.protocol.BraveDubboRpcTracker;
-import net.nightawk.dubbo.protocol.http.BraveHttpRpcTracker;
+import net.nightawk.dubbo.http.BraveHttpRpcTracker;
 
 /**
  * @author Xs.

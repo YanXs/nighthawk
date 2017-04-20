@@ -37,7 +37,7 @@
         <property name="transportAddress" value="127.0.0.1:9411"/>
     </bean>
 
-    <bean id="traceIdWatcher" class="net.nightawk.dubbo.protocol.ThreadLocalTraceIdWatcher"/>
+    <bean id="traceIdWatcher" class="net.nightawk.dubbo.ThreadLocalTraceIdWatcher"/>
 
     <bean id="braveRpcTrackerEngine" class="net.nightawk.dubbo.spring.BraveRpcTrackerEngineFactoryBean">
         <property name="brave" ref="brave"/>

@@ -1,9 +1,8 @@
 package net.nightawk.test.service;
 
-import net.nightawk.dubbo.protocol.TraceIdWatcher;
+import net.nightawk.dubbo.TraceIdWatcher;
 import net.nightawk.redis.JaRedisPool;
 import net.nightawk.test.entity.Employee;
-import org.springframework.beans.factory.annotation.Autowired;
 import redis.clients.jedis.Jedis;
 
 import java.util.List;

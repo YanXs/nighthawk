@@ -34,13 +34,13 @@
         </dependency>
 
         <dependency>
-            <groupId>org.jboss.resteasy</groupId>
-            <artifactId>resteasy-jaxrs</artifactId>
+            <groupId>io.zipkin.brave</groupId>
+            <artifactId>brave-http</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>org.jboss.resteasy</groupId>
-            <artifactId>resteasy-client</artifactId>
+            <groupId>io.zipkin.brave</groupId>
+            <artifactId>brave-web-servlet-filter</artifactId>
         </dependency>
     </dependencies>
 </project>
