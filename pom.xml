@@ -9,7 +9,7 @@
     <version>1.0.0.RELEASE</version>
     <modules>
         <module>nightawk-core</module>
-        <module>nightawk-dubbo</module>
+        <module>nightawk-dubbo3</module>
         <module>nightawk-test</module>
         <module>nightawk-redis</module>
         <module>nightawk-reporter</module>

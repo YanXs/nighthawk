@@ -13,11 +13,11 @@
         <property name="transportAddress" value="127.0.0.1:9411"/>
     </bean>
 
-    <bean id="statementTracer" class="net.nightawk.sphex.StatementTracer">
+    <bean id="statementTracer" class="net.nightawk.jdbc.StatementTracer">
         <property name="clientTracer" value="#{brave.clientTracer()}"/>
     </bean>
 
-    <bean id="basicDataSourceInterceptor" class="net.nightawk.sphex.basic.BasicDataSourceTracingInterceptor">
+    <bean id="basicDataSourceInterceptor" class="net.nightawk.jdbc.basic.BasicDataSourceTracingInterceptor">
         <constructor-arg ref="statementTracer"/>
     </bean>
 
@@ -37,6 +37,6 @@
     </bean>
     <bean id="mysqlConfigurer" class="org.mybatis.spring.mapper.MapperScannerConfigurer">
         <property name="sqlSessionFactoryBeanName" value="datasourceMySqlSessionFactory"/>
-        <property name="basePackage" value="net.nightawk.sphex.test"/>
+        <property name="basePackage" value="net.nightawk.jdbc.test"/>
     </bean>
 </beans>

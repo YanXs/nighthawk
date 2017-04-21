@@ -31,28 +31,28 @@
         <property name="dataSource" ref="dataSource_mysql1"/>
     </bean>
 
-    <bean id="statementTracer" class="net.nightawk.sphex.StatementTracer">
+    <bean id="statementTracer" class="net.nightawk.jdbc.StatementTracer">
         <property name="clientTracer" value="#{brave.clientTracer()}"/>
     </bean>
 
-    <bean id="basicDataSourceInterceptor" class="net.nightawk.sphex.basic.BasicDataSourceTracingInterceptor">
+    <bean id="basicDataSourceInterceptor" class="net.nightawk.jdbc.basic.BasicDataSourceTracingInterceptor">
         <constructor-arg ref="statementTracer"/>
     </bean>
 
-    <bean id="dataSource_mysql1" class="net.nightawk.sphex.basic.SphexBasicDataSource" destroy-method="close">
+    <bean id="tracingMBean" class="net.nightawk.jdbc.tomcat.TracingInterceptorMBean">
+        <constructor-arg ref="statementTracer"/>
+    </bean>
+
+    <bean id="dataSource_mysql1" class="org.apache.tomcat.jdbc.pool.DataSource" destroy-method="close">
         <property name="driverClassName" value="${database.driverClassName}"/>
         <property name="url" value="${database.url}"/>
         <property name="username" value="${database.userName}"/>
         <property name="password" value="root"/>
-        <property name="initialSize" value="25"/>
+        <property name="initialSize" value="1"/>
         <property name="maxActive" value="100"/>
         <property name="maxIdle" value="5"/>
         <property name="maxWait" value="30000"/>
-        <property name="interceptors">
-            <list>
-                <ref bean="basicDataSourceInterceptor"/>
-            </list>
-        </property>
+        <property name="jdbcInterceptors" value="net.nightawk.jdbc.tomcat.TomcatDataSourceTracingInterceptor"/>
     </bean>
 
     <bean id="mysqlConfigurer1" class="org.mybatis.spring.mapper.MapperScannerConfigurer">

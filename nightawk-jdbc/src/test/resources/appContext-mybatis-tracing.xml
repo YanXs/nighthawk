@@ -6,7 +6,7 @@
     <bean id="datasourceMySqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
         <property name="dataSource" ref="dataSource_mysql"/>
         <property name="plugins">
-            <bean class="net.nightawk.sphex.mybatis.MybatisTracingInterceptor">
+            <bean class="net.nightawk.jdbc.mybatis.MybatisTracingInterceptor">
                 <property name="statementTracer" ref="statementTracer"/>
             </bean>
         </property>
@@ -18,19 +18,19 @@
         <property name="transportAddress" value="127.0.0.1:9411"/>
     </bean>
 
-    <bean id="statementTracer" class="net.nightawk.sphex.StatementTracer">
+    <bean id="statementTracer" class="net.nightawk.jdbc.StatementTracer">
         <property name="clientTracer" value="#{brave.clientTracer()}"/>
     </bean>
 
-    <bean id="basicDataSourceInterceptor" class="net.nightawk.sphex.basic.BasicDataSourceTracingInterceptor">
+    <bean id="basicDataSourceInterceptor" class="net.nightawk.jdbc.basic.BasicDataSourceTracingInterceptor">
         <constructor-arg ref="statementTracer"/>
     </bean>
 
-    <bean id="dataSource_mysql" class="net.nightawk.sphex.mybatis.BasicDataSourceAdapter">
+    <bean id="dataSource_mysql" class="net.nightawk.jdbc.mybatis.BasicDataSourceAdapter">
         <constructor-arg ref="dataSource_mysql_origin"/>
     </bean>
 
-    <bean id="dataSource_mysql_origin" class="net.nightawk.sphex.basic.SphexBasicDataSource">
+    <bean id="dataSource_mysql_origin" class="net.nightawk.jdbc.basic.SphexBasicDataSource">
         <property name="driverClassName" value="com.mysql.jdbc.Driver"/>
         <property name="url" value="jdbc:mysql://127.0.0.1:3306/test?autoReconnect=true"/>
         <property name="username" value="root"/>
@@ -57,7 +57,7 @@
         <property name="minPoolSize" value="1"/>
     </bean>
 
-    <bean id="dataSource_oracle" class="net.nightawk.sphex.basic.SphexBasicDataSource" destroy-method="close">
+    <bean id="dataSource_oracle" class="net.nightawk.jdbc.basic.SphexBasicDataSource" destroy-method="close">
         <property name="driverClassName" value="oracle.jdbc.driver.OracleDriver"/>
         <property name="url" value="jdbc:oracle:thin:@10.16.0.109:1521:TADB"/>
         <property name="username" value="ta_5"/>
@@ -71,6 +71,6 @@
 
     <bean id="mysqlConfigurer" class="org.mybatis.spring.mapper.MapperScannerConfigurer">
         <property name="sqlSessionFactoryBeanName" value="datasourceMySqlSessionFactory"/>
-        <property name="basePackage" value="net.nightawk.sphex.test"/>
+        <property name="basePackage" value="net.nightawk.jdbc.test"/>
     </bean>
 </beans>

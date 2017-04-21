@@ -9,11 +9,11 @@
         <property name="transportAddress" value="192.168.150.132:9411"/>
     </bean>
 
-    <bean id="statementTracer" class="net.nightawk.sphex.StatementTracer">
+    <bean id="statementTracer" class="net.nightawk.jdbc.StatementTracer">
         <property name="clientTracer" value="#{brave.clientTracer()}"/>
     </bean>
 
-    <bean id="preparedStatementInterceptor" class="net.nightawk.sphex.mysql.PreparedStatementInterceptor">
+    <bean id="preparedStatementInterceptor" class="net.nightawk.jdbc.mysql.PreparedStatementInterceptor">
         <property name="statementTracer" ref="statementTracer"/>
     </bean>
 </beans>
