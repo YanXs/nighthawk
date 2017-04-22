@@ -1,7 +1,7 @@
 package net.nightawk.dubbo;
 
+import com.alibaba.dubbo.tracker.DubboResponse;
 import com.alibaba.dubbo.tracker.TrackerKeys;
-import com.alibaba.dubbo.tracker.dubbo.DubboResponse;
 import com.github.kristofa.brave.ClientResponseAdapter;
 import com.github.kristofa.brave.KeyValueAnnotation;
 

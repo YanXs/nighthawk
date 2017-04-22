@@ -1,9 +1,9 @@
 package net.nightawk.dubbo;
 
+import com.alibaba.dubbo.tracker.DubboRequest;
+import com.alibaba.dubbo.tracker.DubboRequestSpanNameProvider;
 import com.alibaba.dubbo.tracker.RpcAttachment;
 import com.alibaba.dubbo.tracker.TrackerKeys;
-import com.alibaba.dubbo.tracker.dubbo.DubboRequest;
-import com.alibaba.dubbo.tracker.dubbo.DubboRequestSpanNameProvider;
 import com.github.kristofa.brave.ClientRequestAdapter;
 import com.github.kristofa.brave.IdConversion;
 import com.github.kristofa.brave.KeyValueAnnotation;
