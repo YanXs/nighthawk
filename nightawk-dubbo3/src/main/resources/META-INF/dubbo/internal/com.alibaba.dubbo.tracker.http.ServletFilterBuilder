@@ -1,1 +1,1 @@
-zipkin=net.nightawk.dubbo.http.BraveServletFilterBuilder
+zipkin=com.github.nightawk.dubbo.http.BraveServletFilterBuilder

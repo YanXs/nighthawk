@@ -4,16 +4,16 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>nighthawk-parent</artifactId>
-        <groupId>net.nightawk</groupId>
+        <groupId>com.github.nightawk</groupId>
         <version>1.0.0.RELEASE</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>nightawk-sphex</artifactId>
+    <artifactId>nightawk-jdbc</artifactId>
 
     <dependencies>
         <dependency>
-            <groupId>net.nightawk</groupId>
+            <groupId>com.github.nightawk</groupId>
             <artifactId>nightawk-core</artifactId>
             <version>${project.version}</version>
         </dependency>

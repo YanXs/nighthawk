@@ -1,1 +1,1 @@
-zipkin=net.nightawk.dubbo.BraveRpcTrackerEngineFactory
+zipkin=com.github.nightawk.dubbo.BraveRpcTrackerEngineFactory

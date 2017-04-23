@@ -1,1 +1,1 @@
-zipkin=net.nightawk.dubbo.BraveDubboRequestInterceptorBuilder
+zipkin=com.github.nightawk.dubbo.BraveDubboRequestInterceptorBuilder
