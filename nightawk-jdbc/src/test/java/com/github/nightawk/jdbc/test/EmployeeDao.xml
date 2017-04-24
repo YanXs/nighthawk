@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="net.nightawk.jdbc.test.EmployeeDao">
+<mapper namespace="com.github.nightawk.jdbc.test.EmployeeDao">
 
-    <resultMap id="BaseResultMap" type="net.nightawk.jdbc.test.Employee">
+    <resultMap id="BaseResultMap" type="com.github.nightawk.jdbc.test.Employee">
         <result column="id" property="id" jdbcType="INTEGER"/>
         <result column="name" property="name" jdbcType="VARCHAR"/>
         <result column="zip" property="zip" jdbcType="VARCHAR"/>
@@ -12,11 +12,11 @@
         SELECT ID, NAME, ZIP from employee
     </select>
 
-    <select id="getEmployee" resultType="net.nightawk.jdbc.test.Employee">
+    <select id="getEmployee" resultType="com.github.nightawk.jdbc.test.Employee">
         SELECT ID, NAME, ZIP from employee WHERE id = #{id}
     </select>
 
-    <insert id="insert" parameterType="net.nightawk.jdbc.test.Employee">
+    <insert id="insert" parameterType="com.github.nightawk.jdbc.test.Employee">
         INSERT INTO employee (id, name, zip ) VALUES (#{id}, #{name}, #{zip})
     </insert>
 

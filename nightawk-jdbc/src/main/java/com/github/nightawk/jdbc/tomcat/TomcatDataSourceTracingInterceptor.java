@@ -119,7 +119,6 @@ public class TomcatDataSourceTracingInterceptor extends AbstractCreateStatementI
         return constructors[idx];
     }
 
-
     private String lookupUrl() {
         if (url == null) {
             JdbcInterceptor interceptor = getNext();
@@ -141,9 +140,10 @@ public class TomcatDataSourceTracingInterceptor extends AbstractCreateStatementI
         url = getUrlFromConnectionPool(pool);
     }
 
-    private String getUrlFromConnectionPool(ConnectionPool pool){
+    private String getUrlFromConnectionPool(ConnectionPool pool) {
         return pool.getPoolProperties().getUrl();
     }
+
     @Override
     public void closeInvoked() {
         // NOP
