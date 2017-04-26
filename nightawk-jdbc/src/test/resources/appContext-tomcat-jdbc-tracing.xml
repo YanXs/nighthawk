@@ -7,17 +7,17 @@
         <property name="dataSource" ref="dataSource_tomcat_jdbc"/>
     </bean>
 
-    <bean id="brave" class="com.github.nightawk.core.brave.BraveFactoryBean">
+    <bean id="brave" class="net.xmoshi.nightawk.core.brave.BraveFactoryBean">
         <property name="serviceName" value="basic-tracing"/>
         <property name="transport" value="http"/>
         <property name="transportAddress" value="127.0.0.1:9411"/>
     </bean>
 
-    <bean id="statementTracer" class="com.github.nightawk.jdbc.StatementTracer">
+    <bean id="statementTracer" class="net.xmoshi.nightawk.jdbc.StatementTracer">
         <property name="clientTracer" value="#{brave.clientTracer()}"/>
     </bean>
 
-    <bean id="tracingMBean" class="com.github.nightawk.jdbc.tomcat.TracingInterceptorMBean">
+    <bean id="tracingMBean" class="net.xmoshi.nightawk.jdbc.tomcat.TracingInterceptorMBean">
         <constructor-arg ref="statementTracer"/>
     </bean>
 
@@ -32,11 +32,11 @@
         <property name="testWhileIdle" value="true"/>
         <property name="timeBetweenEvictionRunsMillis" value="60000"/>
         <property name="numTestsPerEvictionRun" value="10"/>
-        <property name="jdbcInterceptors" value="com.github.nightawk.jdbc.tomcat.TomcatDataSourceTracingInterceptor"/>
+        <property name="jdbcInterceptors" value="net.xmoshi.nightawk.jdbc.tomcat.TomcatDataSourceTracingInterceptor"/>
     </bean>
 
     <bean id="mysqlConfigurer" class="org.mybatis.spring.mapper.MapperScannerConfigurer">
         <property name="sqlSessionFactoryBeanName" value="datasourceMySqlSessionFactory"/>
-        <property name="basePackage" value="com.github.nightawk.jdbc.test"/>
+        <property name="basePackage" value="net.xmoshi.nightawk.jdbc.test"/>
     </bean>
 </beans>

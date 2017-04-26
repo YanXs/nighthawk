@@ -3,17 +3,17 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans
         http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
 
-    <bean id="brave" class="com.github.nightawk.core.brave.BraveFactoryBean">
+    <bean id="brave" class="net.xmoshi.nightawk.core.brave.BraveFactoryBean">
         <property name="serviceName" value="mybatis-tracing"/>
         <property name="transport" value="http"/>
-        <property name="transportAddress" value="192.168.150.132:9411"/>
+        <property name="transportAddress" value="127.0.0.1:9411"/>
     </bean>
 
-    <bean id="statementTracer" class="com.github.nightawk.jdbc.StatementTracer">
+    <bean id="statementTracer" class="net.xmoshi.nightawk.jdbc.StatementTracer">
         <property name="clientTracer" value="#{brave.clientTracer()}"/>
     </bean>
 
-    <bean id="preparedStatementInterceptor" class="com.github.nightawk.jdbc.mysql.PreparedStatementInterceptor">
+    <bean id="preparedStatementInterceptor" class="net.xmoshi.nightawk.jdbc.mysql.PreparedStatementInterceptor">
         <property name="statementTracer" ref="statementTracer"/>
     </bean>
 </beans>
