@@ -17,6 +17,36 @@
     </modules>
     <packaging>pom</packaging>
 
+    <name>${project.artifactId}</name>
+    <description>A distributed tracing framework using zipkin</description>
+    <url>https://github.com/YanXs/nightawk</url>
+
+    <licenses>
+        <license>
+            <name>The Apache License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
+
+    <scm>
+        <url>https://github.com/YanXs/nightawk</url>
+        <connection>scm:git:git://github.com/YanXs/nightawk.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com/YanXs/nightawk.git</developerConnection>
+        <tag>HEAD</tag>
+    </scm>
+
+    <issueManagement>
+        <system>GitHub Issues</system>
+        <url>https://github.com/YanXs/nightawk/issues</url>
+    </issueManagement>
+
+    <developers>
+        <developer>
+            <name>YanXs</name>
+            <email>yssever@126.com</email>
+        </developer>
+    </developers>
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <main.java.version>1.7</main.java.version>
@@ -334,40 +364,61 @@
             <id>release</id>
             <build>
                 <plugins>
-                    <!-- Creates source jar -->
+                    <!-- Source -->
                     <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-source-plugin</artifactId>
-                        <version>${maven-source-plugin.version}</version>
+                        <version>2.2.1</version>
                         <executions>
                             <execution>
-                                <id>attach-sources</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>jar-no-fork</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <!-- Javadoc -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <version>2.9.1</version>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
                                 <goals>
                                     <goal>jar</goal>
                                 </goals>
                             </execution>
                         </executions>
                     </plugin>
-                    <!-- Creates javadoc jar -->
+                    <!-- GPG -->
                     <plugin>
-                        <artifactId>maven-javadoc-plugin</artifactId>
-                        <version>${maven-javadoc-plugin.version}</version>
-                        <configuration>
-                            <failOnError>false</failOnError>
-                            <!-- hush pedantic warnings: we don't put param and return on everything! -->
-                            <additionalparam>-Xdoclint:none</additionalparam>
-                        </configuration>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>1.5</version>
                         <executions>
                             <execution>
-                                <id>attach-javadocs</id>
+                                <phase>verify</phase>
                                 <goals>
-                                    <goal>jar</goal>
+                                    <goal>sign</goal>
                                 </goals>
-                                <phase>package</phase>
                             </execution>
                         </executions>
                     </plugin>
                 </plugins>
             </build>
+            <distributionManagement>
+                <snapshotRepository>
+                    <id>oss</id>
+                    <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+                </snapshotRepository>
+                <repository>
+                    <id>oss</id>
+                    <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+                </repository>
+            </distributionManagement>
         </profile>
     </profiles>
+
 </project>
