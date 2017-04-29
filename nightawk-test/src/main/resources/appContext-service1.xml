@@ -13,7 +13,7 @@
 
     <dubbo:tracker protocol="zipkin" ref="braveRpcTrackerEngine"/>
 
-    <bean id="service1" class="net.xmoshi.nightawk.test.service.FirstServiceImpl">
+    <bean id="service1" class="com.github.nightawk.test.service.FirstServiceImpl">
         <property name="traceIdWatcher" ref="traceIdWatcher"/>
         <property name="secondService" ref="service2"/>
         <property name="jedisProxyPool" ref="jedisPool"/>
@@ -24,22 +24,22 @@
 
     <!--<dubbo:protocol name="hessian" port="8890" client="okHttpClient"/>-->
 
-    <dubbo:service interface="net.xmoshi.nightawk.test.service.FirstService" ref="service1" protocol="dubbo" cluster="failover"
+    <dubbo:service interface="com.github.nightawk.test.service.FirstService" ref="service1" protocol="dubbo" cluster="failover"
                    timeout="5000">
     </dubbo:service>
 
-    <dubbo:reference id="service2" interface="net.xmoshi.nightawk.test.service.SecondService" check="false"/>
+    <dubbo:reference id="service2" interface="com.github.nightawk.test.service.SecondService" check="false"/>
 
 
-    <bean id="brave" class="net.xmoshi.nightawk.core.brave.BraveFactoryBean">
+    <bean id="brave" class="com.github.nightawk.core.brave.BraveFactoryBean">
         <property name="serviceName" value="simpleService1"/>
         <property name="transport" value="http"/>
         <property name="transportAddress" value="127.0.0.1:9411"/>
     </bean>
 
-    <bean id="traceIdWatcher" class="net.xmoshi.nightawk.dubbo.ThreadLocalTraceIdWatcher"/>
+    <bean id="traceIdWatcher" class="com.github.nightawk.dubbo.ThreadLocalTraceIdWatcher"/>
 
-    <bean id="braveRpcTrackerEngine" class="net.xmoshi.nightawk.dubbo.spring.BraveRpcTrackerEngineFactoryBean">
+    <bean id="braveRpcTrackerEngine" class="com.github.nightawk.dubbo.spring.BraveRpcTrackerEngineFactoryBean">
         <property name="brave" ref="brave"/>
         <property name="traceIdReporter" ref="traceIdWatcher"/>
     </bean>
@@ -51,13 +51,13 @@
         <property name="maxIdle" value="100"/>
     </bean>
 
-    <bean id="jedisPool" class="net.xmoshi.nightawk.redis.JaRedisPool">
+    <bean id="jedisPool" class="com.github.nightawk.redis.JaRedisPool">
         <constructor-arg index="0" ref="jedisPoolConfig"/>
         <constructor-arg index="1" value="127.0.0.1"/>
         <constructor-arg index="2" value="6379" type="int"/>
     </bean>
 
-    <bean class="net.xmoshi.nightawk.redis.JaRedisInterceptorMBean" destroy-method="close">
+    <bean class="com.github.nightawk.redis.JaRedisInterceptorMBean" destroy-method="close">
         <constructor-arg value="#{brave.clientTracer()}"/>
     </bean>
 

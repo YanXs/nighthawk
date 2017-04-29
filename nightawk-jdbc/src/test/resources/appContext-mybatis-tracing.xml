@@ -6,27 +6,27 @@
     <bean id="datasourceMySqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
         <property name="dataSource" ref="dataSource_mysql"/>
         <property name="plugins">
-            <bean class="net.xmoshi.nightawk.jdbc.mybatis.MybatisTracingInterceptor">
+            <bean class="com.github.nightawk.jdbc.mybatis.MybatisTracingInterceptor">
                 <property name="statementTracer" ref="statementTracer"/>
             </bean>
         </property>
     </bean>
 
-    <bean id="brave" class="net.xmoshi.nightawk.core.brave.BraveFactoryBean">
+    <bean id="brave" class="com.github.nightawk.core.brave.BraveFactoryBean">
         <property name="serviceName" value="mybatis-tracing"/>
         <property name="transport" value="http"/>
         <property name="transportAddress" value="127.0.0.1:9411"/>
     </bean>
 
-    <bean id="statementTracer" class="net.xmoshi.nightawk.jdbc.StatementTracer">
+    <bean id="statementTracer" class="com.github.nightawk.jdbc.StatementTracer">
         <property name="clientTracer" value="#{brave.clientTracer()}"/>
     </bean>
 
-    <bean id="basicDataSourceInterceptor" class="net.xmoshi.nightawk.jdbc.basic.BasicDataSourceTracingInterceptor">
+    <bean id="basicDataSourceInterceptor" class="com.github.nightawk.jdbc.basic.BasicDataSourceTracingInterceptor">
         <constructor-arg ref="statementTracer"/>
     </bean>
 
-    <bean id="dataSource_mysql" class="net.xmoshi.nightawk.jdbc.mybatis.BasicDataSourceAdapter">
+    <bean id="dataSource_mysql" class="com.github.nightawk.jdbc.mybatis.BasicDataSourceAdapter">
         <constructor-arg ref="dataSource_mysql_origin"/>
     </bean>
 
@@ -61,6 +61,6 @@
 
     <bean id="mysqlConfigurer" class="org.mybatis.spring.mapper.MapperScannerConfigurer">
         <property name="sqlSessionFactoryBeanName" value="datasourceMySqlSessionFactory"/>
-        <property name="basePackage" value="net.xmoshi.nightawk.jdbc.test"/>
+        <property name="basePackage" value="com.github.nightawk.jdbc.test"/>
     </bean>
 </beans>
