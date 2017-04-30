@@ -1,0 +1,24 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:rabbit="http://www.springframework.org/schema/rabbit"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans-3.0.xsd http://www.springframework.org/schema/rabbit http://www.springframework.org/schema/rabbit/spring-rabbit.xsd">
+
+    <bean id="connectionFactory" class="org.springframework.amqp.rabbit.connection.CachingConnectionFactory">
+        <property name="addresses" value="${mq.addresses}"/>
+        <property name="username" value="${mq.username}" />
+        <property name="password" value="${mq.password}" />
+        <property name="virtualHost" value="/" />
+        <property name="channelCacheSize" value="50" />
+        <property name="publisherReturns" value="true" />
+    </bean>
+
+    <rabbit:admin connection-factory="connectionFactory" />
+
+    <bean class="com.github.nightawk.mq.rabbit.TracingMessageListenerContainer">
+        <property name="connectionFactory" ref="connectionFactory" />
+        <property name="queueNames" value="${rabbitmq.system.out.log.error.mail}" />
+        <property name="concurrentConsumers" value="${rabbitmq.concurrentConsumers}" />
+        <!--<property name="adviceChain" ref="retryOperationsInterceptorFactoryBean" />-->
+        <!--<property name="errorHandler" ref="mqErrorHandler" />-->
+    </bean>
+</beans>

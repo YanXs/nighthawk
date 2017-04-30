@@ -21,12 +21,10 @@ public class TracingRabbitTemplate extends RabbitTemplate {
 
     private final ClientResponseInterceptor clientResponseInterceptor;
 
-    public TracingRabbitTemplate(ClientRequestInterceptor clientRequestInterceptor,
-                                 ClientResponseInterceptor clientResponseInterceptor) {
-        this.clientRequestInterceptor = clientRequestInterceptor;
-        this.clientResponseInterceptor = clientResponseInterceptor;
+    public TracingRabbitTemplate(Brave brave) {
+        this.clientRequestInterceptor = brave.clientRequestInterceptor();
+        this.clientResponseInterceptor = brave.clientResponseInterceptor();
     }
-
 
     public void send(final String exchange, final String routingKey,
                      final Message message, final CorrelationData correlationData)
