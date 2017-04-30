@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>io.groot.nightawk</groupId>
+    <groupId>io.vakilla.nightawk</groupId>
     <artifactId>nighthawk-parent</artifactId>
     <version>1.0.0.RELEASE</version>
     <modules>
@@ -12,8 +12,8 @@
         <module>nightawk-dubbo3</module>
         <module>nightawk-test</module>
         <module>nightawk-redis</module>
-        <module>nightawk-reporter</module>
         <module>nightawk-jdbc</module>
+        <module>nightawk-mq</module>
     </modules>
     <packaging>pom</packaging>
 
