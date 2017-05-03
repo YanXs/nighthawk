@@ -148,6 +148,12 @@
                 <groupId>io.zipkin.brave</groupId>
                 <artifactId>brave-spancollector-kafka</artifactId>
                 <version>${brave.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.apache.kafka</groupId>
+                        <artifactId>kafka-clients</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
 
             <dependency>
@@ -240,6 +246,11 @@
                 <version>1.0.26</version>
             </dependency>
 
+            <dependency>
+                <groupId>com.google.code.gson</groupId>
+                <artifactId>gson</artifactId>
+                <version>2.3.1</version>
+            </dependency>
 
             <!-- test -->
             <dependency>

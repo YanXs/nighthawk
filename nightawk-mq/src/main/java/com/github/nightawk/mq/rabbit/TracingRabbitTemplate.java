@@ -90,7 +90,7 @@ public class TracingRabbitTemplate extends RabbitTemplate {
 
         @Override
         public Collection<KeyValueAnnotation> responseAnnotations() {
-            if (message == null){
+            if (message == null) {
                 return Collections.emptyList();
             }
             KeyValueAnnotation statusAnnotation = KeyValueAnnotation.create("return.status", "OK");

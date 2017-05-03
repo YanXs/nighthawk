@@ -20,7 +20,7 @@ public class TracingMessageListenerContainer extends SimpleMessageListenerContai
     private final ServerRequestInterceptor serverRequestInterceptor;
     private final ServerResponseInterceptor serverResponseInterceptor;
 
-    public TracingMessageListenerContainer(Brave brave){
+    public TracingMessageListenerContainer(Brave brave) {
         this.serverRequestInterceptor = brave.serverRequestInterceptor();
         this.serverResponseInterceptor = brave.serverResponseInterceptor();
     }
@@ -35,7 +35,7 @@ public class TracingMessageListenerContainer extends SimpleMessageListenerContai
         }
     }
 
-    private class RabbitServerRequestAdapter implements ServerRequestAdapter{
+    private class RabbitServerRequestAdapter implements ServerRequestAdapter {
 
         private final Message message;
 
@@ -82,7 +82,7 @@ public class TracingMessageListenerContainer extends SimpleMessageListenerContai
         }
     }
 
-    private class RabbitServerResponseAdapter implements ServerResponseAdapter{
+    private class RabbitServerResponseAdapter implements ServerResponseAdapter {
 
         @Override
         public Collection<KeyValueAnnotation> responseAnnotations() {
