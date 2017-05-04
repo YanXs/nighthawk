@@ -2,26 +2,24 @@ package com.github.nightawk.mq.kafka;
 
 import com.github.nightawk.core.util.Codec;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.common.TopicPartition;
+import org.apache.kafka.common.serialization.Deserializer;
 
 import java.nio.ByteBuffer;
 
-public class Payload {
+public class Payload<K, V> {
 
     private final Codec codec;
+    private final Deserializer<V> valueDeserializer;
     private TracingPayload tracingPayload;
-    private ConsumerRecord<String, byte[]> dataRecord;
-    private final TopicPartition topicPartition;
-    private final Long initialOffset;
+    private ConsumerRecord<K, V> dataRecord;
     private boolean sampled;
 
-    public Payload(Codec codec, TopicPartition topicPartition, Long initialOffset) {
+    public Payload(Codec codec, Deserializer<V> valueDeserializer) {
         this.codec = codec;
-        this.topicPartition = topicPartition;
-        this.initialOffset = initialOffset;
+        this.valueDeserializer = valueDeserializer;
     }
 
-    public void process(ConsumerRecord<String, byte[]> originConsumerRecord) {
+    public void process(ConsumerRecord<K, byte[]> originConsumerRecord) {
         byte[] data = originConsumerRecord.value();
         ByteBuffer byteBuf = ByteBuffer.allocate(data.length);
         byteBuf.put(data);
@@ -36,8 +34,9 @@ public class Payload {
         int dataOffset = tpLen + TracingPayload.TP_LENGTH;
         byte[] vData = new byte[byteBuf.array().length - dataOffset];
         System.arraycopy(byteBuf.array(), dataOffset, vData, 0, vData.length);
-        dataRecord = new ConsumerRecord<>(originConsumerRecord.topic(),
-                originConsumerRecord.partition(), originConsumerRecord.offset(), originConsumerRecord.key(), vData);
+        this.dataRecord = new ConsumerRecord<>(originConsumerRecord.topic(),
+                originConsumerRecord.partition(), originConsumerRecord.offset(),
+                originConsumerRecord.key(), valueDeserializer.deserialize(originConsumerRecord.topic(), vData));
 
     }
 
@@ -53,8 +52,7 @@ public class Payload {
         return tracingPayload;
     }
 
-    public ConsumerRecord<String, byte[]> getDataRecord() {
+    public ConsumerRecord<K, V> getDataRecord() {
         return dataRecord;
     }
-
 }
