@@ -57,7 +57,11 @@ public class JaRedisFactory implements PooledObjectFactory<Jedis> {
     public PooledObject<Jedis> makeObject() throws Exception {
         final HostAndPort hostAndPort = this.hostAndPort.get();
         JaRedis.Builder builder = new JaRedis.Builder();
-        builder.host(hostAndPort.getHost()).port(hostAndPort.getPort()).connectionTimeout(connectionTimeout).soTimeout(soTimeout);
+        builder
+                .host(hostAndPort.getHost())
+                .port(hostAndPort.getPort())
+                .connectionTimeout(connectionTimeout)
+                .soTimeout(soTimeout);
         Jedis jedis = builder.build();
         try {
             jedis.connect();

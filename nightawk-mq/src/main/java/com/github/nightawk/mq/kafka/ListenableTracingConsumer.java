@@ -11,6 +11,7 @@ import org.apache.kafka.common.serialization.Deserializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.nio.ByteBuffer;
 import java.util.*;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -22,6 +23,8 @@ public class ListenableTracingConsumer<K, V> implements ListenableConsumer<K, V>
 
     private final Consumer<K, byte[]> delegate;
 
+    private final Pattern topicPattern;
+
     private final Map<TopicPartition, PayloadContainer> payloadContainers = new HashMap<>();
 
     private volatile boolean running = false;
@@ -32,12 +35,12 @@ public class ListenableTracingConsumer<K, V> implements ListenableConsumer<K, V>
 
     private final Deserializer<V> valueDeserializer;
 
-    private volatile Collection<TopicPartition> assignedPartitions;
-
-    public ListenableTracingConsumer(Consumer<K, byte[]> delegate, Deserializer<V> valueDeserializer) {
+    public ListenableTracingConsumer(Consumer<K, byte[]> delegate, Pattern topicPattern, Deserializer<V> valueDeserializer) {
         this.delegate = delegate;
+        this.topicPattern = topicPattern;
         this.valueDeserializer = valueDeserializer;
         ConsumerRebalanceListener rebalanceListener = createRebalanceListener(delegate);
+        delegate.subscribe(topicPattern, rebalanceListener);
     }
 
     public ConsumerRebalanceListener createRebalanceListener(final Consumer consumer) {
@@ -117,8 +120,7 @@ public class ListenableTracingConsumer<K, V> implements ListenableConsumer<K, V>
         Map<TopicPartition, List<ConsumerRecord<K, V>>> dataRecords = new HashMap<>();
         for (ConsumerRecord<K, byte[]> record : records) {
             TopicPartition topicPartition = new TopicPartition(record.topic(), record.partition());
-            Payload<K, V> payload = new Payload<>(Codec.JSON, valueDeserializer);
-            payload.process(record);
+            Payload<K, V> payload = decode(record, Codec.JSON, valueDeserializer);
             List<ConsumerRecord<K, V>> list = dataRecords.get(topicPartition);
             if (list == null) {
                 list = new ArrayList<>();
@@ -133,6 +135,31 @@ public class ListenableTracingConsumer<K, V> implements ListenableConsumer<K, V>
             payloadContainer.add(payload);
         }
         return new ConsumerRecords<>(dataRecords);
+    }
+
+    public Payload<K, V> decode(ConsumerRecord<K, byte[]> originConsumerRecord, Codec codec, Deserializer<V> valueDeserializer) {
+        TracingPayload tracingPayload = null;
+        ConsumerRecord<K, V> dataRecord = null;
+        boolean sampled = false;
+        byte[] data = originConsumerRecord.value();
+        ByteBuffer byteBuf = ByteBuffer.allocate(data.length);
+        byteBuf.put(data);
+        // get tracing payload length
+        int tpLen = byteBuf.getShort(0);
+        if (tpLen > 0) {
+            byte[] tpBytes = new byte[tpLen];
+            System.arraycopy(byteBuf.array(), TracingPayload.TP_LENGTH, tpBytes, 0, tpLen);
+            tracingPayload = Codec.JSON.read(tpBytes, TracingPayload.class);
+            sampled = true;
+        }
+        int dataOffset = tpLen + TracingPayload.TP_LENGTH;
+        byte[] vData = new byte[byteBuf.array().length - dataOffset];
+        System.arraycopy(byteBuf.array(), dataOffset, vData, 0, vData.length);
+        dataRecord = new ConsumerRecord<>(originConsumerRecord.topic(),
+                originConsumerRecord.partition(), originConsumerRecord.offset(),
+                originConsumerRecord.key(), valueDeserializer.deserialize(originConsumerRecord.topic(), vData));
+
+        return new Payload<>(tracingPayload, dataRecord, sampled);
     }
 
     @Override
@@ -213,12 +240,16 @@ public class ListenableTracingConsumer<K, V> implements ListenableConsumer<K, V>
     @Override
     public void run() {
         while (isRunning()) {
-            ConsumerRecords<K, V> records = poll(getPollTimeout());
-            if (records != null && this.logger.isDebugEnabled()) {
-                this.logger.debug("Received: " + records.count() + " records");
-            }
-            if (records != null && records.count() > 0) {
-                invokeRecordListener(records);
+            try {
+                ConsumerRecords<K, V> records = poll(getPollTimeout());
+                if (records != null && this.logger.isDebugEnabled()) {
+                    this.logger.debug("Received: " + records.count() + " records");
+                }
+                if (records != null && records.count() > 0) {
+                    invokeRecordListener(records);
+                }
+            } catch (Exception e) {
+                this.logger.error("caught exception", e);
             }
         }
         try {
@@ -235,12 +266,12 @@ public class ListenableTracingConsumer<K, V> implements ListenableConsumer<K, V>
     @SuppressWarnings("unchecked")
     private void invokeRecordListener(final ConsumerRecords<K, V> records) {
         for (ConsumerRecord<K, V> record : records) {
+            TopicPartition topicPartition = topicPartition(record);
             PayloadContainer payloadContainer = this.payloadContainers.get(topicPartition(record));
             Payload pl = null;
             if (payloadContainer == null || (pl = payloadContainer.peek()) == null) {
                 throw new IllegalStateException("payload should not be null");
             }
-
             this.listener.preProcessPayload(pl);
             Throwable t = null;
             try {
@@ -251,6 +282,9 @@ public class ListenableTracingConsumer<K, V> implements ListenableConsumer<K, V>
             } finally {
                 this.listener.postProcessPayload(pl, t);
             }
+            Map<TopicPartition, OffsetAndMetadata> commits = Collections.singletonMap(
+                    topicPartition, new OffsetAndMetadata(record.offset() + 1));
+            commitSync(commits);
         }
     }
 

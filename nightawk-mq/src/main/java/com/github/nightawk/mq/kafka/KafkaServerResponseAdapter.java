@@ -21,7 +21,7 @@ public class KafkaServerResponseAdapter implements ServerResponseAdapter {
         if (error == null) {
             statusAnnotation = KeyValueAnnotation.create("process.status", "OK");
         } else {
-            statusAnnotation = KeyValueAnnotation.create("process.stat", ExceptionTracer.trace(error));
+            statusAnnotation = KeyValueAnnotation.create("process.status", ExceptionTracer.trace(error));
         }
         return Collections.singletonList(statusAnnotation);
     }
