@@ -1,7 +1,9 @@
 package com.github.nightawk.redis;
 
 import com.github.kristofa.brave.ClientTracer;
+import com.github.kristofa.brave.SpanId;
 import com.github.nightawk.core.intercept.ByteBuddyInterceptor;
+import com.github.nightawk.core.util.TracingLoop;
 import net.bytebuddy.implementation.bind.annotation.*;
 import redis.clients.jedis.Jedis;
 
@@ -15,9 +17,15 @@ import java.util.concurrent.atomic.AtomicReference;
 /**
  * @author Xs.
  */
-public class JaRedisInterceptor implements ByteBuddyInterceptor {
+public class JaRedisInterceptor implements ByteBuddyInterceptor, TracingLoop {
 
     private static final AtomicReference<ClientTracer> reference = new AtomicReference<>(null);
+
+    private final TracingLoop delegate;
+
+    public JaRedisInterceptor() {
+        delegate = TracingLoop.DEFAULT_LOOP;
+    }
 
     public static void setClientTracer(final ClientTracer tracer) {
         reference.set(tracer);
@@ -40,19 +48,24 @@ public class JaRedisInterceptor implements ByteBuddyInterceptor {
             exception = e;
             throw new JaRedisCallException("Call superMethod error.", e);
         } finally {
-            if (getClientTracer() != null) {
+            if (getClientTracer() != null && inTracingLoop()) {
                 endTrace(getClientTracer(), exception);
             }
         }
     }
 
     private void beginTrace(final ClientTracer tracer, Jedis jedis, Method method) {
-        tracer.startNewSpan("redis");
-        tracer.submitBinaryAnnotation("execute.command", method.getName());
         try {
-            setClientSent(tracer, jedis);
+            SpanId spanId = tracer.startNewSpan("redis");
+            if (spanId != null) {
+                joinTracingLoop();
+                tracer.submitBinaryAnnotation("execute.command", method.getName());
+                setClientSent(tracer, jedis);
+            }
         } catch (Exception e) {
-            tracer.setClientSent();
+            if (inTracingLoop()) {
+                tracer.setClientSent();
+            }
         }
     }
 
@@ -72,5 +85,20 @@ public class JaRedisInterceptor implements ByteBuddyInterceptor {
         } finally {
             tracer.setClientReceived();
         }
+    }
+
+    @Override
+    public boolean inTracingLoop() {
+        return delegate.inTracingLoop();
+    }
+
+    @Override
+    public void joinTracingLoop() {
+        delegate.joinTracingLoop();
+    }
+
+    @Override
+    public void leaveTracingLoop() {
+        delegate.leaveTracingLoop();
     }
 }

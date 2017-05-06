@@ -25,4 +25,12 @@ public class Payload<K, V> {
     public ConsumerRecord<K, V> getDataRecord() {
         return dataRecord;
     }
+
+    public K key() {
+        return dataRecord.key();
+    }
+
+    public V value() {
+        return dataRecord.value();
+    }
 }

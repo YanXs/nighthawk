@@ -1,6 +1,8 @@
 package com.github.nightawk.jdbc;
 
 import com.github.kristofa.brave.ClientTracer;
+import com.github.kristofa.brave.SpanId;
+import com.github.nightawk.core.util.TracingLoop;
 import com.github.nightawk.jdbc.support.*;
 
 import java.io.PrintWriter;
@@ -14,13 +16,16 @@ import java.util.Map;
 /**
  * @author Xs.
  */
-public class StatementTracer {
+public class StatementTracer implements TracingLoop {
 
     private volatile ClientTracer clientTracer;
 
     private Map<String, URLParser> parsers;
 
+    private final TracingLoop delegate;
+
     public StatementTracer() {
+        delegate = TracingLoop.DEFAULT_LOOP;
         parsers = new HashMap<>();
         parsers.put("mysql", new MysqlURLParser());
         parsers.put("oracle", new OracleURLParser());
@@ -59,11 +64,16 @@ public class StatementTracer {
                 DatabaseURL databaseUrl = parser.parse(url);
                 String serviceName = scheme + "-" + databaseUrl.getDataBase();
                 InetAddress address = Inet4Address.getByName(databaseUrl.getHost());
-                clientTracer.startNewSpan(scheme);
-                clientTracer.submitBinaryAnnotation("execute.sql", sql);
-                setClientSent(address, databaseUrl.getPort(), serviceName);
+                SpanId spanId = clientTracer.startNewSpan(scheme);
+                if (spanId != null) {
+                    joinTracingLoop();
+                    clientTracer.submitBinaryAnnotation("execute.sql", sql);
+                    setClientSent(address, databaseUrl.getPort(), serviceName);
+                }
             } catch (Exception e) {
-                clientTracer.setClientSent();
+                if (inTracingLoop()) {
+                    clientTracer.setClientSent();
+                }
             }
         }
     }
@@ -74,16 +84,22 @@ public class StatementTracer {
     }
 
     public void endTrace(final int warningCount, final Throwable throwable) {
-        if (clientTracer != null) {
-            try {
-                if (warningCount > 0) {
-                    clientTracer.submitBinaryAnnotation("warning.count", warningCount);
+        try {
+            if (clientTracer != null && inTracingLoop()) {
+                try {
+                    if (warningCount > 0) {
+                        clientTracer.submitBinaryAnnotation("warning.count", warningCount);
+                    }
+                    if (throwable != null) {
+                        clientTracer.submitBinaryAnnotation("error.message", traceThrowable(throwable));
+                    }
+                } finally {
+                    clientTracer.setClientReceived();
                 }
-                if (throwable != null) {
-                    clientTracer.submitBinaryAnnotation("error.message", traceThrowable(throwable));
-                }
-            } finally {
-                clientTracer.setClientReceived();
+            }
+        } finally {
+            if (inTracingLoop()) {
+                leaveTracingLoop();
             }
         }
     }
@@ -93,5 +109,20 @@ public class StatementTracer {
         PrintWriter printWriter = new PrintWriter(stringWriter);
         throwable.printStackTrace(printWriter);
         return stringWriter.toString();
+    }
+
+    @Override
+    public boolean inTracingLoop() {
+        return false;
+    }
+
+    @Override
+    public void joinTracingLoop() {
+
+    }
+
+    @Override
+    public void leaveTracingLoop() {
+
     }
 }

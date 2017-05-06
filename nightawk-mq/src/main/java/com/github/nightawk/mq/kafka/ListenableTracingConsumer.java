@@ -11,7 +11,6 @@ import org.apache.kafka.common.serialization.Deserializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.nio.ByteBuffer;
 import java.util.*;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -33,14 +32,12 @@ public class ListenableTracingConsumer<K, V> implements ListenableConsumer<K, V>
 
     private long pollTimeout = 1000;
 
-    private final Deserializer<V> valueDeserializer;
+    private final PayloadDecoder<K, V> payloadDecoder;
 
     public ListenableTracingConsumer(Consumer<K, byte[]> delegate, Pattern topicPattern, Deserializer<V> valueDeserializer) {
         this.delegate = delegate;
         this.topicPattern = topicPattern;
-        this.valueDeserializer = valueDeserializer;
-        ConsumerRebalanceListener rebalanceListener = createRebalanceListener(delegate);
-        delegate.subscribe(topicPattern, rebalanceListener);
+        this.payloadDecoder = new PayloadDecoder<>(Codec.JSON, valueDeserializer);
     }
 
     public ConsumerRebalanceListener createRebalanceListener(final Consumer consumer) {
@@ -68,16 +65,18 @@ public class ListenableTracingConsumer<K, V> implements ListenableConsumer<K, V>
         if (listener == null) {
             throw new IllegalStateException("no listener set");
         }
+        ConsumerRebalanceListener rebalanceListener = createRebalanceListener(delegate);
+        delegate.subscribe(topicPattern, rebalanceListener);
         Thread executeThread = new Thread(this);
         executeThread.start();
         setRunning(true);
     }
 
-    public void addListener(PayloadListener<K, V> recordListener) {
+    public void addListener(PayloadListener<K, V> payloadListener) {
         if (isRunning()) {
             throw new IllegalStateException("listener should be set before consumer start");
         }
-        this.listener = recordListener;
+        this.listener = payloadListener;
     }
 
     @Override
@@ -120,7 +119,7 @@ public class ListenableTracingConsumer<K, V> implements ListenableConsumer<K, V>
         Map<TopicPartition, List<ConsumerRecord<K, V>>> dataRecords = new HashMap<>();
         for (ConsumerRecord<K, byte[]> record : records) {
             TopicPartition topicPartition = new TopicPartition(record.topic(), record.partition());
-            Payload<K, V> payload = decode(record, Codec.JSON, valueDeserializer);
+            Payload<K, V> payload = payloadDecoder.decode(record);
             List<ConsumerRecord<K, V>> list = dataRecords.get(topicPartition);
             if (list == null) {
                 list = new ArrayList<>();
@@ -135,31 +134,6 @@ public class ListenableTracingConsumer<K, V> implements ListenableConsumer<K, V>
             payloadContainer.add(payload);
         }
         return new ConsumerRecords<>(dataRecords);
-    }
-
-    public Payload<K, V> decode(ConsumerRecord<K, byte[]> originConsumerRecord, Codec codec, Deserializer<V> valueDeserializer) {
-        TracingPayload tracingPayload = null;
-        ConsumerRecord<K, V> dataRecord = null;
-        boolean sampled = false;
-        byte[] data = originConsumerRecord.value();
-        ByteBuffer byteBuf = ByteBuffer.allocate(data.length);
-        byteBuf.put(data);
-        // get tracing payload length
-        int tpLen = byteBuf.getShort(0);
-        if (tpLen > 0) {
-            byte[] tpBytes = new byte[tpLen];
-            System.arraycopy(byteBuf.array(), TracingPayload.TP_LENGTH, tpBytes, 0, tpLen);
-            tracingPayload = Codec.JSON.read(tpBytes, TracingPayload.class);
-            sampled = true;
-        }
-        int dataOffset = tpLen + TracingPayload.TP_LENGTH;
-        byte[] vData = new byte[byteBuf.array().length - dataOffset];
-        System.arraycopy(byteBuf.array(), dataOffset, vData, 0, vData.length);
-        dataRecord = new ConsumerRecord<>(originConsumerRecord.topic(),
-                originConsumerRecord.partition(), originConsumerRecord.offset(),
-                originConsumerRecord.key(), valueDeserializer.deserialize(originConsumerRecord.topic(), vData));
-
-        return new Payload<>(tracingPayload, dataRecord, sampled);
     }
 
     @Override

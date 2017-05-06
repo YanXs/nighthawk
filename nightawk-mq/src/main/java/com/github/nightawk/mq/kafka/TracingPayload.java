@@ -4,6 +4,16 @@ public class TracingPayload {
 
     public static final int TP_LENGTH = 2;
 
+    public static final int TRACE_ID_LENGTH = "traceId".length();
+
+    public static final int SPAN_ID_LENGTH = "spanId".length();
+
+    public static final int PARENT_SPAN_ID_LENGTH = "parentSpanId".length();
+
+    public static final int SAMPLED_LENGTH = "sampled".length();
+
+    public static final int HEADER_LENGTH = TP_LENGTH + TRACE_ID_LENGTH + SPAN_ID_LENGTH + PARENT_SPAN_ID_LENGTH + SAMPLED_LENGTH;
+
     private String traceId;
 
     private String spanId;
