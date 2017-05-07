@@ -8,15 +8,15 @@ nightawk提供多种追踪功能：
 * nightawk-redis 提供redis调用监控功能
 * nightawk-jdbc  提供如下几种方式监控数据库:
 
-    -- nightawk-commons-jdbc   提供对commons-dbcp BasicDataSource的监控
-    -- nightawk-mybatis 利用mybatis Interceptor机制提供数据库查询监控功能
-    -- nightawk-mysql   提供mysql数据库查询监控功能，如果程序中使用了mybatis推荐使用nightawk-mybatis(不可重复使用)
-    -- nightawk-druid   利用[druid](https://github.com/alibaba/druid)数据源Filter机制，实现TracingFilter监控数据库(与nightawk-mybatis不可重复使用)
-    -- nightawk-tomcat-jdbc  提供对tomcat-jdbc的监控
-    
+    -- nightawk-commons-jdbc   提供对commons-dbcp BasicDataSource的监控  
+    -- nightawk-mybatis 利用mybatis Interceptor机制提供数据库查询监控功能  
+    -- nightawk-mysql   提供mysql数据库查询监控功能，如果程序中使用了mybatis推荐使用nightawk-mybatis(不可重复使用)  
+    -- nightawk-druid   利用[druid](https://github.com/alibaba/druid)数据源Filter机制，实现TracingFilter监控数据库(与nightawk-mybatis不可重复使用)  
+    -- nightawk-tomcat-jdbc  提供对tomcat-jdbc的监控  
 * nightawk-mq    提供消息中间件的追踪功能，目前支持kafka,rabbitmq
 
-##使用方法
+
+## 使用方法
 * nightawk-dubbo
 night-dubbo没有使用dubbo2的Filter做扩展，Filter不够灵活，所以我修改了dubbo2同步请求应答实现方式，并添加了Interceptor接口，[dubbo3](https://github.com/YanXs/dubbo3)
 通过Interceptor修改请求，dubbo协议请求对应的Interceptor为BraveDubboClientRequestInterceptor
