@@ -26,8 +26,7 @@ public class PayloadDecoder<K, V> {
         if (data.length <= TracingPayload.HEADER_LENGTH) {
             vData = data;
         } else {
-            ByteBuffer byteBuf = ByteBuffer.allocate(data.length);
-            byteBuf.put(data);
+            ByteBuffer byteBuf = ByteBuffer.wrap(data);
             // get tracing payload length
             int tpLen = byteBuf.getShort(0);
             if (tpLen > 256) {

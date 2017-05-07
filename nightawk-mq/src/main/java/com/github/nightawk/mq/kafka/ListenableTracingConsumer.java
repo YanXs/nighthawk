@@ -1,6 +1,7 @@
 package com.github.nightawk.mq.kafka;
 
 import com.github.nightawk.core.util.Codec;
+import com.github.nightawk.core.util.ErrorHandler;
 import org.apache.kafka.clients.consumer.*;
 import org.apache.kafka.common.Metric;
 import org.apache.kafka.common.MetricName;
@@ -12,8 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.regex.Pattern;
 
 public class ListenableTracingConsumer<K, V> implements ListenableConsumer<K, V>, Runnable {
@@ -33,6 +32,8 @@ public class ListenableTracingConsumer<K, V> implements ListenableConsumer<K, V>
     private long pollTimeout = 1000;
 
     private final PayloadDecoder<K, V> payloadDecoder;
+
+    private ErrorHandler errorHandler;
 
     public ListenableTracingConsumer(Consumer<K, byte[]> delegate, Pattern topicPattern, Deserializer<V> valueDeserializer) {
         this.delegate = delegate;
@@ -125,7 +126,7 @@ public class ListenableTracingConsumer<K, V> implements ListenableConsumer<K, V>
                 list = new ArrayList<>();
                 dataRecords.put(topicPartition, list);
             }
-            list.add(payload.getDataRecord());
+            list.add(payload.record());
             PayloadContainer payloadContainer = payloadContainers.get(topicPartition);
             if (payloadContainer == null) {
                 payloadContainer = new PayloadContainer(topicPartition);
@@ -220,10 +221,14 @@ public class ListenableTracingConsumer<K, V> implements ListenableConsumer<K, V>
                     this.logger.debug("Received: " + records.count() + " records");
                 }
                 if (records != null && records.count() > 0) {
-                    invokeRecordListener(records);
+                    invokePayloadListener(records);
                 }
             } catch (Exception e) {
-                this.logger.error("caught exception", e);
+                if (errorHandler != null) {
+                    errorHandler.handle(e);
+                } else {
+                    this.logger.error("caught exception", e);
+                }
             }
         }
         try {
@@ -238,14 +243,14 @@ public class ListenableTracingConsumer<K, V> implements ListenableConsumer<K, V>
     }
 
     @SuppressWarnings("unchecked")
-    private void invokeRecordListener(final ConsumerRecords<K, V> records) {
+    private void invokePayloadListener(final ConsumerRecords<K, V> records) {
         for (ConsumerRecord<K, V> record : records) {
             TopicPartition topicPartition = topicPartition(record);
             PayloadContainer payloadContainer = this.payloadContainers.get(topicPartition(record));
-            Payload pl = null;
-            if (payloadContainer == null || (pl = payloadContainer.peek()) == null) {
+            if (payloadContainer == null || payloadContainer.isEmpty()) {
                 throw new IllegalStateException("payload should not be null");
             }
+            Payload pl = payloadContainer.poll();
             this.listener.preProcessPayload(pl);
             Throwable t = null;
             try {
@@ -279,6 +284,10 @@ public class ListenableTracingConsumer<K, V> implements ListenableConsumer<K, V>
         this.running = running;
     }
 
+    public void setErrorHandler(ErrorHandler errorHandler) {
+        this.errorHandler = errorHandler;
+    }
+
     private TopicPartition topicPartition(ConsumerRecord consumerRecord) {
         return new TopicPartition(consumerRecord.topic(), consumerRecord.partition());
     }
@@ -287,7 +296,7 @@ public class ListenableTracingConsumer<K, V> implements ListenableConsumer<K, V>
 
         private final TopicPartition topicPartition;
 
-        private final BlockingQueue<Payload> pendingPayloads = new LinkedBlockingQueue<>();
+        private final Queue<Payload> pendingPayloads = new LinkedList<>();
 
         private PayloadContainer(TopicPartition topicPartition) {
             this.topicPartition = topicPartition;
@@ -305,8 +314,8 @@ public class ListenableTracingConsumer<K, V> implements ListenableConsumer<K, V>
             return pendingPayloads.poll();
         }
 
-        public Payload peek() {
-            return pendingPayloads.peek();
+        public boolean isEmpty() {
+            return pendingPayloads.isEmpty();
         }
     }
 

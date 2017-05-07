@@ -6,6 +6,7 @@ import com.github.kristofa.brave.SpanId;
 import com.github.kristofa.brave.TraceData;
 
 import java.util.Collection;
+import java.util.Collections;
 
 import static com.github.kristofa.brave.IdConversion.convertToLong;
 
@@ -44,7 +45,7 @@ public class KafkaServerRequestAdapter implements ServerRequestAdapter {
 
     @Override
     public Collection<KeyValueAnnotation> requestAnnotations() {
-        return null;
+        return Collections.emptyList();
     }
 
     private SpanId getSpanId(String traceId, String spanId, String parentSpanId) {

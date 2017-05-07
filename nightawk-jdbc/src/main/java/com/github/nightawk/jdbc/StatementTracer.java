@@ -22,10 +22,9 @@ public class StatementTracer implements TracingLoop {
 
     private Map<String, URLParser> parsers;
 
-    private final TracingLoop delegate;
+    private final TracingLoop delegate = TracingLoop.DEFAULT_LOOP;
 
     public StatementTracer() {
-        delegate = TracingLoop.DEFAULT_LOOP;
         parsers = new HashMap<>();
         parsers.put("mysql", new MysqlURLParser());
         parsers.put("oracle", new OracleURLParser());
@@ -113,16 +112,16 @@ public class StatementTracer implements TracingLoop {
 
     @Override
     public boolean inTracingLoop() {
-        return false;
+        return delegate.inTracingLoop();
     }
 
     @Override
     public void joinTracingLoop() {
-
+        delegate.joinTracingLoop();
     }
 
     @Override
     public void leaveTracingLoop() {
-
+        delegate.leaveTracingLoop();
     }
 }

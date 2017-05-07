@@ -1,9 +1,12 @@
 package com.github.nightawk.mq.test;
 
+import com.github.kristofa.brave.Brave;
+import com.github.nightawk.core.brave.BraveFactoryBean;
 import com.github.nightawk.core.util.Codec;
+import com.github.nightawk.core.util.Sleeper;
+import com.github.nightawk.mq.kafka.AbstractTracingListener;
 import com.github.nightawk.mq.kafka.ListenableTracingConsumer;
 import com.github.nightawk.mq.kafka.Payload;
-import com.github.nightawk.mq.kafka.PayloadListener;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
@@ -11,6 +14,7 @@ import org.apache.kafka.common.serialization.StringDeserializer;
 import org.junit.Test;
 
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 public class ListenableTracingConsumerTest {
@@ -30,26 +34,24 @@ public class ListenableTracingConsumerTest {
         props.put("value.deserializer", "org.apache.kafka.common.serialization.ByteArrayDeserializer");
         Consumer<String, byte[]> consumer = new KafkaConsumer<>(props);
         ListenableTracingConsumer<String, String> listenableTracingConsumer =
-                new ListenableTracingConsumer<>(consumer, Pattern.compile("test0"), new StringDeserializer());
-        listenableTracingConsumer.addListener(new PayloadListener<String, String>() {
-            @Override
-            public void preProcessPayload(Payload<String, String> payload) {
-                System.out.println("pre process");
-            }
-
+                new ListenableTracingConsumer<>(consumer, Pattern.compile("test"), new StringDeserializer());
+        BraveFactoryBean factoryBean = new BraveFactoryBean();
+        factoryBean.setServiceName("kafka-test");
+        factoryBean.setTransport("http");
+        factoryBean.setTransportAddress("192.168.150.133:9411");
+        factoryBean.afterPropertiesSet();
+        Brave brave = factoryBean.getObject();
+        listenableTracingConsumer.addListener(new AbstractTracingListener<String, String>(brave) {
             @Override
             public void onPayload(Payload<String, String> payload) {
-                System.out.println(payload.value());
-            }
-
-            @Override
-            public void postProcessPayload(Payload<String, String> payload, Throwable t) {
-                System.out.println("post process");
+                try {
+                    Sleeper.JUST_SLEEP.sleepFor(2000, TimeUnit.MILLISECONDS);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
             }
         });
         listenableTracingConsumer.start();
         System.in.read();
     }
-
-
 }

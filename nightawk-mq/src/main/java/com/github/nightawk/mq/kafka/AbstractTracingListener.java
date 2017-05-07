@@ -23,5 +23,4 @@ public abstract class AbstractTracingListener<K, V> implements PayloadListener<K
             brave.serverResponseInterceptor().handle(new KafkaServerResponseAdapter(t));
         }
     }
-
 }

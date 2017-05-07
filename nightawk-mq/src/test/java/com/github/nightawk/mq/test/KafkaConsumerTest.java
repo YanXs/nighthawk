@@ -26,7 +26,7 @@ public class KafkaConsumerTest {
         props.put("value.deserializer.tracing.codec", Codec.JSON);
         props.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
         Consumer<String, String> consumer = new KafkaConsumer<>(props);
-        consumer.subscribe(Collections.singletonList("test0"), new ConsumerRebalanceListener() {
+        consumer.subscribe(Collections.singletonList("test"), new ConsumerRebalanceListener() {
             @Override
             public void onPartitionsRevoked(Collection<TopicPartition> partitions) {
 

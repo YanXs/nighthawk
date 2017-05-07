@@ -22,7 +22,7 @@ public class Payload<K, V> {
         return tracingPayload;
     }
 
-    public ConsumerRecord<K, V> getDataRecord() {
+    public ConsumerRecord<K, V> record() {
         return dataRecord;
     }
 
