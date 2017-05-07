@@ -80,11 +80,7 @@ nightawk-mybatis利用mybatis的Interceptor实现扩展点，详见TracingInterc
     </property>
 </bean>
 
-<bean id="brave" class="com.github.nightawk.core.brave.BraveFactoryBean">
-    <property name="serviceName" value="mybatis-tracing"/>
-    <property name="transport" value="http"/>
-    <property name="transportAddress" value="127.0.0.1:9411"/>
-</bean>
+<bean id="brave" .../>
 
 <bean id="statementTracer" class="com.github.nightawk.jdbc.StatementTracer">
     <property name="clientTracer" value="#{brave.clientTracer()}"/>
@@ -112,11 +108,7 @@ nightawk-mybatis利用mybatis的Interceptor实现扩展点，详见TracingInterc
 [brave-mysql](https://github.com/openzipkin/brave)相同，稍作修改的地方是只关心PreparedStatement的执行情况
 
 ```xml
-<bean id="brave" class="com.github.nightawk.core.brave.BraveFactoryBean">
-    <property name="serviceName" value="mybatis-tracing"/>
-    <property name="transport" value="http"/>
-    <property name="transportAddress" value="192.168.150.132:9411"/>
-</bean>
+<bean id="brave" .../>
 
 <bean id="statementTracer" class="com.github.nightawk.sphex.StatementTracer">
     <property name="clientTracer" value="#{brave.clientTracer()}"/>
@@ -133,11 +125,7 @@ nightawk-mybatis利用mybatis的Interceptor实现扩展点，详见TracingInterc
 如果项目中使用[druid](https://github.com/alibaba/druid)作为数据源，可以使用TracingFilter监控追踪数据库
 
 ```xml
-<bean id="brave" class="com.github.nightawk.core.brave.BraveFactoryBean">
-    <property name="serviceName" value="mybatis-tracing"/>
-    <property name="transport" value="http"/>
-    <property name="transportAddress" value="192.168.150.132:9411"/>
-</bean>
+<bean id="brave" .../>
 
 <bean id="statementTracer" class="com.github.nightawk.sphex.StatementTracer">
     <property name="clientTracer" value="#{brave.clientTracer()}"/>
@@ -166,11 +154,7 @@ BasicDataSource本身并没有提供Interceptor或者Filter机制对Statement进
 以及后面对于DelegatingPreparedStatement的扩展
 
 ```xml
-<bean id="brave" class="com.github.nightawk.core.brave.BraveFactoryBean">
-    <property name="serviceName" value="basic-tracing"/>
-    <property name="transport" value="http"/>
-    <property name="transportAddress" value="127.0.0.1:9411"/>
-</bean>
+<bean id="brave" .../>
 
 <bean id="statementTracer" class="com.github.nightawk.jdbc.StatementTracer">
     <property name="clientTracer" value="#{brave.clientTracer()}"/>
@@ -197,11 +181,7 @@ BasicDataSource本身并没有提供Interceptor或者Filter机制对Statement进
 基于tomcat-jdbc的JdbcInterceptor扩展点，实现对数据库的监控
 
 ```xml
-<bean id="brave" class="com.github.nightawk.core.brave.BraveFactoryBean">
-    <property name="serviceName" value="basic-tracing"/>
-    <property name="transport" value="http"/>
-    <property name="transportAddress" value="127.0.0.1:9411"/>
-</bean>
+<bean id="brave" .../>
 
 <bean id="statementTracer" class="com.github.nightawk.jdbc.StatementTracer">
     <property name="clientTracer" value="#{brave.clientTracer()}"/>
@@ -220,7 +200,7 @@ BasicDataSource本身并没有提供Interceptor或者Filter机制对Statement进
 </bean>
 ```
 
-* nightawk-mq:Kafka消息追踪
+* nightawk-mq:kafka  
 Consumer:
 
 ```java
@@ -253,7 +233,7 @@ KafkaProducer<String, byte[]> producer = new KafkaProducer<>(props);
 ......
 ```
 
-
+* nightawk-mq:rabbit
 
 
 
