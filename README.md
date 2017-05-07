@@ -1,17 +1,20 @@
 # nightawk
 
 nightawk是一个分布式服务追踪框架，利用[Zipkin](http://zipkin.io/)收集分布式链路数据，以zipkin UI展示，Zipkin提供多种客户端,nightawk使用java客户端[brave](https://github.com/openzipkin/brave)收集数据
-nightawk提供多种插件：
+nightawk提供多种追踪功能：
 
-## 目前支持的插件
-* nightawk-dubbo 该插件提供[dubbo3](https://github.com/YanXs/dubbo3)框架链路追踪的功能，具体开启方式见[dubbo3](https://github.com/YanXs/dubbo3)教程
-* nightawk-redis 该插件提供redis调用监控功能
-* nightawk-jdbc 该插件提供如下几种方式监控数据库
+## 目前支持的追踪功能
+* nightawk-dubbo 提供[dubbo3](https://github.com/YanXs/dubbo3)框架链路追踪的功能，具体开启方式见[dubbo3](https://github.com/YanXs/dubbo3)教程
+* nightawk-redis 提供redis调用监控功能
+* nightawk-jdbc  提供如下几种方式监控数据库:
+
     -- nightawk-commons-jdbc   提供对commons-dbcp BasicDataSource的监控
     -- nightawk-mybatis 利用mybatis Interceptor机制提供数据库查询监控功能
     -- nightawk-mysql   提供mysql数据库查询监控功能，如果程序中使用了mybatis推荐使用nightawk-mybatis(不可重复使用)
     -- nightawk-druid   利用[druid](https://github.com/alibaba/druid)数据源Filter机制，实现TracingFilter监控数据库(与nightawk-mybatis不可重复使用)
     -- nightawk-tomcat-jdbc  提供对tomcat-jdbc的监控
+    
+* nightawk-mq    提供消息中间件的追踪功能，目前支持kafka,rabbitmq
 
 ##使用方法
 * nightawk-dubbo
@@ -100,9 +103,6 @@ nightawk-mybatis利用mybatis的Interceptor实现扩展点，详见TracingInterc
     <property name="url" value="jdbc:mysql://127.0.0.1:3306/test?autoReconnect=true"/>
     <property name="username" value="root"/>
     <property name="password" value="root"/>
-    <property name="maxActive" value="80"/>
-    <property name="maxIdle" value="20"/>
-    <property name="maxWait" value="3000"/>
 </bean>
 ```
 
@@ -220,6 +220,38 @@ BasicDataSource本身并没有提供Interceptor或者Filter机制对Statement进
 </bean>
 ```
 
+* nightawk-mq:Kafka消息追踪
+Consumer:
+
+```java
+Consumer<String, byte[]> consumer = new KafkaConsumer<>(props);
+ListenableTracingConsumer<String, String> listenableTracingConsumer =
+      new ListenableTracingConsumer<>(consumer, Pattern.compile("test"), new StringDeserializer());
+        
+// create brave
+Brave brave = ...
+listenableTracingConsumer.addListener(new AbstractTracingListener<String, String>(brave) {
+            @Override
+            public void onPayload(Payload<String, String> payload) {
+                try {
+                    Sleeper.JUST_SLEEP.sleepFor(2000, TimeUnit.MILLISECONDS);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
+listenableTracingConsumer.start();
+```
+
+Producer:
+
+```java
+Properties props = new Properties();
+props.put("tracing.component", brave);
+props.put("value.serializer", "com.github.nightawk.mq.kafka.TracingSerializer");
+KafkaProducer<String, byte[]> producer = new KafkaProducer<>(props);
+......
+```
 
 
 
