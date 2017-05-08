@@ -33,4 +33,16 @@ public class Payload<K, V> {
     public V value() {
         return dataRecord.value();
     }
+
+    public String topic() {
+        return dataRecord.topic();
+    }
+
+    public int partition() {
+        return dataRecord.partition();
+    }
+
+    public long offset() {
+        return dataRecord.offset();
+    }
 }

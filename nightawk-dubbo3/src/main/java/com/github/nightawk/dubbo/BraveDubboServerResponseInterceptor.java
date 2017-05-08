@@ -17,8 +17,6 @@ public class BraveDubboServerResponseInterceptor implements ServerResponseInterc
 
     @Override
     public void handle(ServerResponseAdapter serverResponseAdapter) {
-        if (serverResponseAdapter.isTraceable()) {
-            serverResponseInterceptor.handle((com.github.kristofa.brave.ServerResponseAdapter) serverResponseAdapter);
-        }
+        serverResponseInterceptor.handle((com.github.kristofa.brave.ServerResponseAdapter) serverResponseAdapter);
     }
 }

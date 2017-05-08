@@ -19,7 +19,7 @@ public class BraveDubboServerResponseAdapter implements ServerResponseAdapter, c
     }
 
     public boolean isTraceable() {
-        return response.isTraceable();
+        return true;
     }
 
     @Override

@@ -1,28 +1,43 @@
-package com.github.nightawk.mq.test;
+package com.github.nightawk.mq.kafka.spring;
 
 import com.github.kristofa.brave.Brave;
-import com.github.nightawk.core.brave.BraveFactoryBean;
 import org.apache.kafka.clients.producer.KafkaProducer;
-import org.apache.kafka.clients.producer.ProducerRecord;
-import org.junit.Test;
+import org.apache.kafka.clients.producer.Producer;
+import org.springframework.beans.factory.FactoryBean;
+import org.springframework.beans.factory.InitializingBean;
 
 import java.util.Properties;
 
-/**
- * @author Xs
- */
-public class TracingProducerTest {
+public class KafkaProducerFactoryBean implements FactoryBean<Producer>, InitializingBean {
 
-    @Test
-    public void test() throws Exception {
+    private Brave brave;
 
-        BraveFactoryBean factoryBean = new BraveFactoryBean();
-        factoryBean.setServiceName("kafka-test");
-        factoryBean.setTransport("http");
-        factoryBean.setTransportAddress("127.0.0.1:9411");
-        factoryBean.afterPropertiesSet();
-        Brave brave = factoryBean.getObject();
+    private Producer producer;
 
+    public void setBrave(Brave brave) {
+        this.brave = brave;
+    }
+
+    @Override
+    public Producer getObject() throws Exception {
+        if (producer == null) {
+            afterPropertiesSet();
+        }
+        return producer;
+    }
+
+    @Override
+    public Class<?> getObjectType() {
+        return producer == null ? Producer.class : producer.getClass();
+    }
+
+    @Override
+    public boolean isSingleton() {
+        return true;
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
         Properties props = new Properties();
         props.put("bootstrap.servers", "127.0.0.1:9092");//该地址是集群的子集，用来探测集群。
         props.put("acks", "all");// 记录完整提交，最慢的但是最大可能的持久化
@@ -33,12 +48,6 @@ public class TracingProducerTest {
         props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
         props.put("tracing.component", brave);
         props.put("value.serializer", "com.github.nightawk.mq.kafka.TracingSerializer");
-
-
-        KafkaProducer<String, byte[]> producer = new KafkaProducer<>(props);
-        for (int i = 0; i < 1000; i++) {
-            producer.send(new ProducerRecord<>("test", "hello", ("kafka - " + i).getBytes()));
-            Thread.sleep(10000);
-        }
+        producer = new KafkaProducer<>(props);
     }
 }

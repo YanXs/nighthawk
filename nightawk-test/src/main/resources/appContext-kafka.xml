@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="brave" class="com.github.nightawk.core.brave.BraveFactoryBean">
+        <property name="serviceName" value="mq-kafka"/>
+        <property name="transport" value="http"/>
+        <property name="transportAddress" value="127.0.0.1:9411"/>
+    </bean>
+
+    <bean id="payloadListener" class="com.github.nightawk.test.service.KafkaService">
+        <constructor-arg index="0" ref="brave"/>
+    </bean>
+
+    <bean id="tracingConsumer" class="com.github.nightawk.mq.kafka.spring.ListenableConsumerFactoryBean">
+        <property name="payloadListener" ref="payloadListener"/>
+    </bean>
+
+</beans>

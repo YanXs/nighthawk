@@ -17,6 +17,7 @@
         <property name="traceIdWatcher" ref="traceIdWatcher"/>
         <property name="secondService" ref="service2"/>
         <property name="jedisProxyPool" ref="jedisPool"/>
+        <property name="kafkaProducer" ref="kafkaProducer"/>
     </bean>
 
     <!-- provider-->
@@ -61,4 +62,8 @@
         <constructor-arg value="#{brave.clientTracer()}"/>
     </bean>
 
+
+    <bean id="kafkaProducer" class="com.github.nightawk.mq.kafka.spring.KafkaProducerFactoryBean">
+        <property name="brave" ref="brave"/>
+     </bean>
 </beans>

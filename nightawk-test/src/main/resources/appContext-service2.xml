@@ -50,7 +50,6 @@
         <property name="password" value="root"/>
         <property name="initialSize" value="1"/>
         <property name="maxActive" value="100"/>
-        <property name="maxIdle" value="5"/>
         <property name="maxWait" value="30000"/>
         <property name="jdbcInterceptors" value="com.github.nightawk.jdbc.tomcat.TomcatDataSourceTracingInterceptor"/>
     </bean>

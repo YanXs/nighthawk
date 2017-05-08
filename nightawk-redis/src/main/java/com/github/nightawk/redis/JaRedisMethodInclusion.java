@@ -33,6 +33,7 @@ public class JaRedisMethodInclusion implements MethodInclusion {
                 .or(named("clusterSlots"))
                 .or(named("isConnected"))
                 .or(named("ping"))
+                .or(named("quit"))
                 .or(named("checkIsInMultiOrPipeline")));
     }
 }

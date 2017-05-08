@@ -18,8 +18,6 @@ public class BraveDubboClientResponseInterceptor implements ClientResponseInterc
 
     @Override
     public void handle(ClientResponseAdapter clientResponseAdapter) {
-        if (clientResponseAdapter.isTraceable()) {
-            clientResponseInterceptor.handle((com.github.kristofa.brave.ClientResponseAdapter) clientResponseAdapter);
-        }
+        clientResponseInterceptor.handle((com.github.kristofa.brave.ClientResponseAdapter) clientResponseAdapter);
     }
 }

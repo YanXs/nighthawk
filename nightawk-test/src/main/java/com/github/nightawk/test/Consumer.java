@@ -12,7 +12,7 @@ public class Consumer {
         ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("appContext-consumer.xml");
         context.start();
         FirstService firstService = (FirstService) context.getBean("service1");
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 3; i++) {
             Employee employee = firstService.getEmployee(1);
         }
         System.in.read();

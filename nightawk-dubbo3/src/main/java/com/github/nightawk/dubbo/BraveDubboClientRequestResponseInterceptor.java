@@ -27,7 +27,7 @@ public class BraveDubboClientRequestResponseInterceptor implements Interceptor {
     @Override
     public Response intercept(Chain chain) throws RemotingException {
         Request request = chain.request();
-        rpcTracker.trackClientRequest(new BraveDubboClientRequestAdapter(new DubboRequest(request), spanNameProvider));
+        rpcTracker.trackClientRequest(new BraveDubboClientRequestAdapter(new DubboRequest(request, DubboRequest.Type.OUT), spanNameProvider));
         Response response = chain.proceed(request, chain.timeout());
         rpcTracker.trackClientResponse(new BraveDubboClientResponseAdapter(new DubboResponse(response)));
         return response;

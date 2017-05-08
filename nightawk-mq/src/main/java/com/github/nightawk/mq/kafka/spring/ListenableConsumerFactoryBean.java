@@ -1,26 +1,50 @@
-package com.github.nightawk.mq.test;
+package com.github.nightawk.mq.kafka.spring;
 
-import com.github.kristofa.brave.Brave;
-import com.github.nightawk.core.brave.BraveFactoryBean;
 import com.github.nightawk.core.util.Codec;
-import com.github.nightawk.core.util.Sleeper;
-import com.github.nightawk.mq.kafka.AbstractTracingListener;
+import com.github.nightawk.mq.kafka.ListenableConsumer;
 import com.github.nightawk.mq.kafka.ListenableTracingConsumer;
-import com.github.nightawk.mq.kafka.Payload;
+import com.github.nightawk.mq.kafka.PayloadListener;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.serialization.StringDeserializer;
-import org.junit.Test;
+import org.springframework.beans.factory.FactoryBean;
+import org.springframework.beans.factory.InitializingBean;
 
 import java.util.Properties;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
-public class ListenableTracingConsumerTest {
+public class ListenableConsumerFactoryBean implements FactoryBean<ListenableConsumer>, InitializingBean {
 
-    @Test
-    public void test() throws Exception {
+
+    private PayloadListener payloadListener;
+
+    private ListenableConsumer listenableConsumer;
+
+    public void setPayloadListener(PayloadListener payloadListener) {
+        this.payloadListener = payloadListener;
+    }
+
+    @Override
+    public ListenableConsumer getObject() throws Exception {
+        if (listenableConsumer == null) {
+            afterPropertiesSet();
+        }
+        return listenableConsumer;
+    }
+
+    @Override
+    public Class<?> getObjectType() {
+        return listenableConsumer == null ? ListenableConsumer.class : listenableConsumer.getClass();
+    }
+
+    @Override
+    public boolean isSingleton() {
+        return true;
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
         Properties props = new Properties();
         props.put("bootstrap.servers", "127.0.0.1:9092");//该地址是集群的子集，用来探测集群。
         props.put(ConsumerConfig.GROUP_ID_CONFIG, "test-consumer-group");
@@ -33,25 +57,12 @@ public class ListenableTracingConsumerTest {
         props.put("value.deserializer.tracing.codec", Codec.JSON);
         props.put("value.deserializer", "org.apache.kafka.common.serialization.ByteArrayDeserializer");
         Consumer<String, byte[]> consumer = new KafkaConsumer<>(props);
-        ListenableTracingConsumer<String, String> listenableTracingConsumer =
+        listenableConsumer =
                 new ListenableTracingConsumer<>(consumer, Pattern.compile("test"), new StringDeserializer());
-        BraveFactoryBean factoryBean = new BraveFactoryBean();
-        factoryBean.setServiceName("kafka-test");
-        factoryBean.setTransport("http");
-        factoryBean.setTransportAddress("127.0.0.1:9411");
-        factoryBean.afterPropertiesSet();
-        Brave brave = factoryBean.getObject();
-        listenableTracingConsumer.addListener(new AbstractTracingListener<String, String>(brave) {
-            @Override
-            public void onPayload(Payload<String, String> payload) {
-                try {
-                    Sleeper.JUST_SLEEP.sleepFor(2000, TimeUnit.MILLISECONDS);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        });
-        listenableTracingConsumer.start();
-        System.in.read();
+        if(payloadListener != null){
+            listenableConsumer.addListener(payloadListener);
+        }
+
+        listenableConsumer.start();
     }
 }

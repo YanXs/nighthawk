@@ -20,7 +20,7 @@ public abstract class AbstractTracingListener<K, V> implements PayloadListener<K
     @Override
     public void postProcessPayload(Payload<K, V> payload, Throwable t) {
         if (payload.isSampled()){
-            brave.serverResponseInterceptor().handle(new KafkaServerResponseAdapter(t));
+            brave.serverResponseInterceptor().handle(new KafkaServerResponseAdapter(payload, t));
         }
     }
 }
