@@ -16,6 +16,18 @@
 
     <bean id="tracingConsumer" class="com.github.nightawk.mq.kafka.spring.ListenableConsumerFactoryBean">
         <property name="payloadListener" ref="payloadListener"/>
+        <property name="configs">
+        <map>
+            <entry key="bootstrap.servers" value="127.0.0.1:9092"/>
+            <entry key="acks" value="all"/>
+            <entry key="retries" value="3"/>
+            <entry key="batch.size" value="16384"/>
+            <entry key="linger.ms" value="1"/>
+            <entry key="buffer.memory" value="33554432"/>
+            <entry key="key.deserializer" value="org.apache.kafka.common.serialization.StringDeserializer"/>
+            <entry key="value.deserializer" value="org.apache.kafka.common.serialization.ByteArrayDeserializer"/>
+        </map>
+        </property>
     </bean>
 
 </beans>

@@ -8,6 +8,7 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import redis.clients.jedis.Jedis;
 
 import java.util.List;
+import java.util.Properties;
 import java.util.UUID;
 
 public class FirstServiceImpl implements FirstService {

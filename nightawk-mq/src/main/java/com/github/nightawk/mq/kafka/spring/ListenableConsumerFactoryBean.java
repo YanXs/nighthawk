@@ -10,19 +10,26 @@ import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.util.Assert;
 
+import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Pattern;
 
 public class ListenableConsumerFactoryBean implements FactoryBean<ListenableConsumer>, InitializingBean {
 
-
     private PayloadListener payloadListener;
+
+    private Map<String, Object> configs;
 
     private ListenableConsumer listenableConsumer;
 
     public void setPayloadListener(PayloadListener payloadListener) {
         this.payloadListener = payloadListener;
+    }
+
+    public void setConfigs(Map<String, Object> configs) {
+        this.configs = configs;
     }
 
     @Override
@@ -45,18 +52,10 @@ public class ListenableConsumerFactoryBean implements FactoryBean<ListenableCons
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        Properties props = new Properties();
-        props.put("bootstrap.servers", "127.0.0.1:9092");//该地址是集群的子集，用来探测集群。
-        props.put(ConsumerConfig.GROUP_ID_CONFIG, "test-consumer-group");
-        props.put("acks", "all");// 记录完整提交，最慢的但是最大可能的持久化
-        props.put("retries", 3);// 请求失败重试的次数
-        props.put("batch.size", 16384);// batch的大小
-        props.put("linger.ms", 1);// 默认情况即使缓冲区有剩余的空间，也会立即发送请求，设置一段时间用来等待从而将缓冲区填的更多，单位为毫秒，producer发送数据会延迟1ms，可以减少发送到kafka服务器的请求数据
-        props.put("buffer.memory", 33554432);// 提供给生产者缓冲内存总量
-        props.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
-        props.put("value.deserializer.tracing.codec", Codec.JSON);
-        props.put("value.deserializer", "org.apache.kafka.common.serialization.ByteArrayDeserializer");
-        Consumer<String, byte[]> consumer = new KafkaConsumer<>(props);
+        Assert.notEmpty(configs, "configs must not be null");
+        Assert.notNull(payloadListener, "payloadListener must be null");
+        configs.put("value.deserializer.tracing.codec", Codec.JSON);
+        Consumer<String, byte[]> consumer = new KafkaConsumer<>(configs);
         listenableConsumer =
                 new ListenableTracingConsumer<>(consumer, Pattern.compile("test"), new StringDeserializer());
         if(payloadListener != null){

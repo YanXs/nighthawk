@@ -7,6 +7,15 @@
         http://code.alibabatech.com/schema/dubbo
         http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
 
+    <bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="locations">
+            <list>
+                <value>classpath:dubbo.properties</value>
+                <value>classpath:param.properties</value>
+            </list>
+        </property>
+    </bean>
+
     <dubbo:application name="simpleService1" destroy-method="close"/>
 
     <dubbo:registry address="zookeeper://127.0.0.1:2181" client="curator"/>
@@ -25,7 +34,8 @@
 
     <!--<dubbo:protocol name="hessian" port="8890" client="okHttpClient"/>-->
 
-    <dubbo:service interface="com.github.nightawk.test.service.FirstService" ref="service1" protocol="dubbo" cluster="failover"
+    <dubbo:service interface="com.github.nightawk.test.service.FirstService" ref="service1" protocol="dubbo"
+                   cluster="failover"
                    timeout="5000">
     </dubbo:service>
 
@@ -35,7 +45,7 @@
     <bean id="brave" class="com.github.nightawk.core.brave.BraveFactoryBean">
         <property name="serviceName" value="simpleService1"/>
         <property name="transport" value="http"/>
-        <property name="transportAddress" value="127.0.0.1:9411"/>
+        <property name="transportAddress" value="192.168.150.133:9411"/>
     </bean>
 
     <bean id="traceIdWatcher" class="com.github.nightawk.dubbo.ThreadLocalTraceIdWatcher"/>
@@ -62,8 +72,19 @@
         <constructor-arg value="#{brave.clientTracer()}"/>
     </bean>
 
-
-    <bean id="kafkaProducer" class="com.github.nightawk.mq.kafka.spring.KafkaProducerFactoryBean">
+    <bean id="kafkaProducer" class="com.github.nightawk.mq.kafka.spring.KafkaTracingProducerFactoryBean">
         <property name="brave" ref="brave"/>
-     </bean>
+        <property name="configs">
+            <map>
+                <entry key="bootstrap.servers" value="127.0.0.1:9092"/>
+                <entry key="acks" value="all"/>
+                <entry key="retries" value="3"/>
+                <entry key="batch.size" value="16384"/>
+                <entry key="linger.ms" value="1"/>
+                <entry key="buffer.memory" value="33554432"/>
+                <entry key="key.serializer" value="org.apache.kafka.common.serialization.StringSerializer"/>
+                <entry key="value.serializer" value="com.github.nightawk.mq.kafka.TracingSerializer"/>
+            </map>
+        </property>
+    </bean>
 </beans>

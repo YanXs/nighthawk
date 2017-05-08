@@ -11,6 +11,7 @@
         <property name="locations">
             <list>
                 <value>classpath:jdbc.properties</value>
+                <value>classpath:param.properties</value>
             </list>
         </property>
     </bean>
@@ -63,7 +64,7 @@
     <bean id="brave" class="com.github.nightawk.core.brave.BraveFactoryBean">
         <property name="serviceName" value="simpleService2"/>
         <property name="transport" value="http"/>
-        <property name="transportAddress" value="127.0.0.1:9411"/>
+        <property name="transportAddress" value="192.168.150.133:9411"/>
     </bean>
 
     <bean id="braveRpcTrackerEngine" class="com.github.nightawk.dubbo.spring.BraveRpcTrackerEngineFactoryBean">
