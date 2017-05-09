@@ -1,6 +1,5 @@
 package com.github.nightawk.mq.kafka;
 
-import com.github.nightawk.core.util.Codec;
 import com.github.nightawk.core.util.ErrorHandler;
 import org.apache.kafka.clients.consumer.*;
 import org.apache.kafka.common.Metric;
@@ -83,6 +82,7 @@ public class ListenableTracingConsumer<K, V> implements ListenableConsumer<K, V>
             delegate.subscribe(topicPattern, rebalanceListener);
         }
         Thread executeThread = new Thread(this);
+        executeThread.setDaemon(true);
         executeThread.start();
         setRunning(true);
     }

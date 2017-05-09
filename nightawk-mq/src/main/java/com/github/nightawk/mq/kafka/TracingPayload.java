@@ -45,7 +45,16 @@ public class TracingPayload {
     }
 
     public byte[] toBytes() {
+        if (traceId == null ||
+                spanId == null ||
+                parentSpanId == null ||
+                sampled == null) {
+            throw new IllegalStateException("tracing span illegal");
+        }
         String tp = traceId + spanId + parentSpanId + sampled;
+        if (tp.length() != LENGTH) {
+            throw new IllegalStateException("tracing span length should be 49, but real length = " + tp.length());
+        }
         return tp.getBytes();
     }
 
