@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
         http://www.springframework.org/schema/beans/spring-beans.xsd">
 
@@ -12,22 +12,43 @@
 
     <bean id="payloadListener" class="com.github.nightawk.test.service.KafkaService">
         <constructor-arg index="0" ref="brave"/>
+        <property name="jedisProxyPool" ref="jedisPool"/>
     </bean>
 
-    <bean id="tracingConsumer" class="com.github.nightawk.mq.kafka.spring.ListenableConsumerFactoryBean">
+    <bean id="tracingConsumer" class="com.github.nightawk.mq.kafka.spring.ListenableConsumerFactoryBean"
+          p:topics="test">
         <property name="payloadListener" ref="payloadListener"/>
         <property name="configs">
-        <map>
-            <entry key="bootstrap.servers" value="127.0.0.1:9092"/>
-            <entry key="acks" value="all"/>
-            <entry key="retries" value="3"/>
-            <entry key="batch.size" value="16384"/>
-            <entry key="linger.ms" value="1"/>
-            <entry key="buffer.memory" value="33554432"/>
-            <entry key="key.deserializer" value="org.apache.kafka.common.serialization.StringDeserializer"/>
-            <entry key="value.deserializer" value="org.apache.kafka.common.serialization.ByteArrayDeserializer"/>
-        </map>
+            <map>
+                <entry key="bootstrap.servers" value="127.0.0.1:9092"/>
+                <entry key="group.id" value="test_group"/>
+                <entry key="acks" value="all"/>
+                <entry key="retries" value="3"/>
+                <entry key="batch.size" value="16384"/>
+                <entry key="linger.ms" value="1"/>
+                <entry key="buffer.memory" value="33554432"/>
+                <entry key="key.deserializer" value="org.apache.kafka.common.serialization.StringDeserializer"/>
+                <entry key="value.deserializer" value="org.apache.kafka.common.serialization.StringDeserializer"/>
+            </map>
         </property>
+    </bean>
+
+
+    <bean class="com.github.nightawk.redis.JaRedisInterceptorMBean" destroy-method="close">
+        <constructor-arg value="#{brave.clientTracer()}"/>
+    </bean>
+
+    <!-- jedis-->
+    <bean id="jedisPoolConfig" class="redis.clients.jedis.JedisPoolConfig">
+        <property name="maxTotal" value="500"/>
+        <property name="minIdle" value="50"/>
+        <property name="maxIdle" value="100"/>
+    </bean>
+
+    <bean id="jedisPool" class="com.github.nightawk.redis.JaRedisPool">
+        <constructor-arg index="0" ref="jedisPoolConfig"/>
+        <constructor-arg index="1" value="127.0.0.1"/>
+        <constructor-arg index="2" value="6379" type="int"/>
     </bean>
 
 </beans>

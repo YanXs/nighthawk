@@ -32,7 +32,7 @@ public class TracingProducerTest {
         props.put("buffer.memory", 33554432);// 提供给生产者缓冲内存总量
         props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
         props.put("tracing.component", brave);
-        props.put("value.serializer", "com.github.nightawk.mq.kafka.TracingSerializer");
+        props.put("value.serializer", "com.github.nightawk.mq.kafka.ByteArrayTracingSerializer");
 
 
         KafkaProducer<String, byte[]> producer = new KafkaProducer<>(props);

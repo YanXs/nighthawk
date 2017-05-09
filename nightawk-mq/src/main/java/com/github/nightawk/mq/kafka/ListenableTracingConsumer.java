@@ -21,7 +21,11 @@ public class ListenableTracingConsumer<K, V> implements ListenableConsumer<K, V>
 
     private final Consumer<K, byte[]> delegate;
 
+    private final Collection<String> topics;
+
     private final Pattern topicPattern;
+
+    private final Deserializer<V> valueDeserializer;
 
     private final Map<TopicPartition, PayloadContainer> payloadContainers = new HashMap<>();
 
@@ -31,14 +35,20 @@ public class ListenableTracingConsumer<K, V> implements ListenableConsumer<K, V>
 
     private long pollTimeout = 1000;
 
-    private final PayloadDecoder<K, V> payloadDecoder;
-
     private ErrorHandler errorHandler;
+
+    public ListenableTracingConsumer(Consumer<K, byte[]> delegate, Collection<String> topics, Deserializer<V> valueDeserializer) {
+        this.delegate = delegate;
+        this.topics = topics;
+        this.topicPattern = null;
+        this.valueDeserializer = valueDeserializer;
+    }
 
     public ListenableTracingConsumer(Consumer<K, byte[]> delegate, Pattern topicPattern, Deserializer<V> valueDeserializer) {
         this.delegate = delegate;
         this.topicPattern = topicPattern;
-        this.payloadDecoder = new PayloadDecoder<>(Codec.JSON, valueDeserializer);
+        this.topics = null;
+        this.valueDeserializer = valueDeserializer;
     }
 
     public ConsumerRebalanceListener createRebalanceListener(final Consumer consumer) {
@@ -67,7 +77,11 @@ public class ListenableTracingConsumer<K, V> implements ListenableConsumer<K, V>
             throw new IllegalStateException("no listener set");
         }
         ConsumerRebalanceListener rebalanceListener = createRebalanceListener(delegate);
-        delegate.subscribe(topicPattern, rebalanceListener);
+        if (topics != null) {
+            delegate.subscribe(topics, rebalanceListener);
+        } else {
+            delegate.subscribe(topicPattern, rebalanceListener);
+        }
         Thread executeThread = new Thread(this);
         executeThread.start();
         setRunning(true);
@@ -120,7 +134,7 @@ public class ListenableTracingConsumer<K, V> implements ListenableConsumer<K, V>
         Map<TopicPartition, List<ConsumerRecord<K, V>>> dataRecords = new HashMap<>();
         for (ConsumerRecord<K, byte[]> record : records) {
             TopicPartition topicPartition = new TopicPartition(record.topic(), record.partition());
-            Payload<K, V> payload = payloadDecoder.decode(record);
+            Payload<K, V> payload = PayloadCodec.decodePayload(valueDeserializer, record);
             List<ConsumerRecord<K, V>> list = dataRecords.get(topicPartition);
             if (list == null) {
                 list = new ArrayList<>();

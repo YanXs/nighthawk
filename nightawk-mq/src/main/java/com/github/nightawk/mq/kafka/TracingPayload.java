@@ -2,17 +2,7 @@ package com.github.nightawk.mq.kafka;
 
 public class TracingPayload {
 
-    public static final int TP_LENGTH = 2;
-
-    public static final int TRACE_ID_LENGTH = "traceId".length();
-
-    public static final int SPAN_ID_LENGTH = "spanId".length();
-
-    public static final int PARENT_SPAN_ID_LENGTH = "parentSpanId".length();
-
-    public static final int SAMPLED_LENGTH = "sampled".length();
-
-    public static final int HEADER_LENGTH = TP_LENGTH + TRACE_ID_LENGTH + SPAN_ID_LENGTH + PARENT_SPAN_ID_LENGTH + SAMPLED_LENGTH;
+    public static final int LENGTH = 49;
 
     private String traceId;
 
@@ -52,5 +42,23 @@ public class TracingPayload {
 
     public void setSampled(String sampled) {
         this.sampled = sampled;
+    }
+
+    public byte[] toBytes() {
+        String tp = traceId + spanId + parentSpanId + sampled;
+        return tp.getBytes();
+    }
+
+    public static TracingPayload fromBytes(byte[] bytes) {
+        if (bytes.length != LENGTH) {
+            throw new IllegalArgumentException("bytes illegal");
+        }
+        String tpString = new String(bytes);
+        TracingPayload tp = new TracingPayload();
+        tp.setTraceId(tpString.substring(0, 16));
+        tp.setSpanId(tpString.substring(17, 32));
+        tp.setParentSpanId(tpString.substring(33, 48));
+        tp.setSampled(tpString.substring(48, 49));
+        return tp;
     }
 }

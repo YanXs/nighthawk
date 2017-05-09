@@ -45,6 +45,8 @@ public class ListenableTracingConsumerTest {
             @Override
             public void onPayload(Payload<String, String> payload) {
                 try {
+                    System.out.println("key: " + payload.key());
+                    System.out.println("value: " + payload.value());
                     Sleeper.JUST_SLEEP.sleepFor(2000, TimeUnit.MILLISECONDS);
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
