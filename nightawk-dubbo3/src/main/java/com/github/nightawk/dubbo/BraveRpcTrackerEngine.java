@@ -71,7 +71,7 @@ public class BraveRpcTrackerEngine implements RpcTrackerEngine {
         if (StringUtils.isEmpty(sampler)) {
             return Sampler.ALWAYS_SAMPLE;
         } else {
-            String rate = url.getParameter("rate");
+            String rate = url.getParameter("samplerate");
             if (StringUtils.isEmpty(rate)) {
                 return Sampler.ALWAYS_SAMPLE;
             }

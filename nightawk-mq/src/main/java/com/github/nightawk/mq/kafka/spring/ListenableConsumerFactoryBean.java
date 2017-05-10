@@ -1,22 +1,17 @@
 package com.github.nightawk.mq.kafka.spring;
 
-import com.github.nightawk.core.util.Codec;
 import com.github.nightawk.mq.kafka.ListenableConsumer;
 import com.github.nightawk.mq.kafka.ListenableTracingConsumer;
 import com.github.nightawk.mq.kafka.PayloadListener;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.serialization.Deserializer;
-import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.Assert;
-import org.springframework.util.ObjectUtils;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Map;
-import java.util.Objects;
 import java.util.regex.Pattern;
 
 public class ListenableConsumerFactoryBean implements FactoryBean<ListenableConsumer>, InitializingBean {
@@ -76,12 +71,16 @@ public class ListenableConsumerFactoryBean implements FactoryBean<ListenableCons
         String valueDeserializerKlass = (String) configs.get("value.deserializer");
         configs.put("value.deserializer", "org.apache.kafka.common.serialization.ByteArrayDeserializer");
         Consumer<String, byte[]> consumer = new KafkaConsumer<>(configs);
+
+        Deserializer valueDeserializer = createDeserializer(valueDeserializerKlass);
+        valueDeserializer.configure(configs, false);
+
         if (topics != null) {
             listenableConsumer =
-                    new ListenableTracingConsumer<>(consumer, Arrays.asList(topics), createDeserializer(valueDeserializerKlass));
+                    new ListenableTracingConsumer<>(consumer, Arrays.asList(topics), valueDeserializer);
         } else {
             listenableConsumer =
-                    new ListenableTracingConsumer<>(consumer, Pattern.compile(topicPatternString), createDeserializer(valueDeserializerKlass));
+                    new ListenableTracingConsumer<>(consumer, Pattern.compile(topicPatternString), valueDeserializer);
         }
         if (payloadListener != null) {
             listenableConsumer.addListener(payloadListener);

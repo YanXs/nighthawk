@@ -9,9 +9,7 @@ public class PayloadCodec {
 
     public static final int HEADER_LENGTH = 4;
 
-    public static final int TRACING_PAYLOAD_LENGTH = 49;
-
-    public static final short MAGIC = (short) 0xcdec;
+    public static final short MAGIC = (short) 0xbabe;
 
     public static <K, V> Payload<K, V> decodePayload(Deserializer<V> valueDeserializer, ConsumerRecord<K, byte[]> originConsumerRecord) {
         TracingPayload tracingPayload = null;
@@ -24,8 +22,8 @@ public class PayloadCodec {
         } else {
             ByteBuffer byteBuf = ByteBuffer.wrap(data);
             short magic = byteBuf.getShort(0);
-            short tpLen = byteBuf.getShort(2);
-            if (magic == MAGIC && tpLen == TRACING_PAYLOAD_LENGTH) {
+            if (magic == MAGIC) {
+                short tpLen = byteBuf.getShort(2);
                 byte[] tpBytes = new byte[tpLen];
                 System.arraycopy(byteBuf.array(), HEADER_LENGTH, tpBytes, 0, tpLen);
                 tracingPayload = TracingPayload.fromBytes(tpBytes);

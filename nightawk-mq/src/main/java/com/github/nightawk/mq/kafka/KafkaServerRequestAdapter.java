@@ -21,18 +21,16 @@ public class KafkaServerRequestAdapter implements ServerRequestAdapter {
     @Override
     public TraceData getTraceData() {
         String sampled = tracingPayload.getSampled();
-        if (sampled != null) {
-            if (sampled.equals("0") || sampled.toLowerCase().equals("false")) {
-                return TraceData.builder().sample(false).build();
-            } else {
-                final String parentSpanId = tracingPayload.getParentSpanId();
-                final String traceId = tracingPayload.getTraceId();
-                final String spanId = tracingPayload.getSpanId();
+        if (sampled == null || sampled.equals("0")) {
+            return TraceData.builder().sample(false).build();
+        } else {
+            final String parentSpanId = tracingPayload.getParentSpanId();
+            final String traceId = tracingPayload.getTraceId();
+            final String spanId = tracingPayload.getSpanId();
 
-                if (traceId != null && spanId != null) {
-                    SpanId span = getSpanId(traceId, spanId, parentSpanId);
-                    return TraceData.builder().sample(true).spanId(span).build();
-                }
+            if (traceId != null && spanId != null) {
+                SpanId span = getSpanId(traceId, spanId, parentSpanId);
+                return TraceData.builder().sample(true).spanId(span).build();
             }
         }
         return TraceData.builder().build();
