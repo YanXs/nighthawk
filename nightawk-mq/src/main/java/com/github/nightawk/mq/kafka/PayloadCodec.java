@@ -22,8 +22,8 @@ public class PayloadCodec {
         } else {
             ByteBuffer byteBuf = ByteBuffer.wrap(data);
             short magic = byteBuf.getShort(0);
-            if (magic == MAGIC) {
-                short tpLen = byteBuf.getShort(2);
+            short tpLen = byteBuf.getShort(2);
+            if (magic == MAGIC && tpLen == TracingPayload.LENGTH) {
                 byte[] tpBytes = new byte[tpLen];
                 System.arraycopy(byteBuf.array(), HEADER_LENGTH, tpBytes, 0, tpLen);
                 tracingPayload = TracingPayload.fromBytes(tpBytes);

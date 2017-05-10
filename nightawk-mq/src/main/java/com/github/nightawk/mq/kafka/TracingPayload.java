@@ -2,6 +2,8 @@ package com.github.nightawk.mq.kafka;
 
 public class TracingPayload {
 
+    public static final int LENGTH = 49;
+
     private String traceId;
 
     private String spanId;
@@ -49,21 +51,37 @@ public class TracingPayload {
                 sampled == null) {
             throw new IllegalStateException("tracing span illegal");
         }
-        String tp = traceId + "%" + spanId + "%" + parentSpanId + "%" + sampled;
-        return tp.getBytes();
+
+        StringBuilder stringBuilder = new StringBuilder(49);
+        stringBuilder
+                .append(appendBlankIfNeeded(traceId))
+                .append(appendBlankIfNeeded(spanId))
+                .append(appendBlankIfNeeded(parentSpanId))
+                .append(sampled);
+        return stringBuilder.toString().getBytes();
+    }
+
+    private String appendBlankIfNeeded(String input) {
+        if (input.length() == 15) {
+            input = input + " ";
+        }
+        return input;
     }
 
     public static TracingPayload fromBytes(byte[] bytes) {
-        String tpString = new String(bytes);
-        String[] strings = tpString.split("%");
-        if (strings.length != 4){
-            throw new IllegalArgumentException("bytes illegal, tpString: " + tpString);
+        if (bytes.length != LENGTH) {
+            throw new IllegalArgumentException("bytes illegal");
         }
+        String tpString = new String(bytes);
         TracingPayload tp = new TracingPayload();
-        tp.setTraceId(strings[0]);
-        tp.setSpanId(strings[1]);
-        tp.setParentSpanId(strings[2]);
-        tp.setSampled(strings[3]);
+        tp.setTraceId(trimmedString(tpString.substring(0, 16)));
+        tp.setSpanId(trimmedString(tpString.substring(17, 32)));
+        tp.setParentSpanId(trimmedString(tpString.substring(33, 48)));
+        tp.setSampled(tpString.substring(48, 49));
         return tp;
+    }
+
+    private static String trimmedString(String input) {
+        return input.trim();
     }
 }
