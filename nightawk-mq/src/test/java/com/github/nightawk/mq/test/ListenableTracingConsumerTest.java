@@ -47,7 +47,7 @@ public class ListenableTracingConsumerTest {
                 try {
                     System.out.println("key: " + payload.key());
                     System.out.println("value: " + payload.value());
-                    Sleeper.JUST_SLEEP.sleepFor(2000, TimeUnit.MILLISECONDS);
+                    Sleeper.JUST.sleepFor(2000, TimeUnit.MILLISECONDS);
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
