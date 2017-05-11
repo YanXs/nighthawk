@@ -4,12 +4,12 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 
 public class Payload<K, V> {
 
-    private final TracingPayload tracingPayload;
+    private final TracingHeader tracingHeader;
     private final ConsumerRecord<K, V> dataRecord;
     private final boolean sampled;
 
-    public Payload(TracingPayload tracingPayload, ConsumerRecord<K, V> dataRecord, boolean sampled) {
-        this.tracingPayload = tracingPayload;
+    public Payload(TracingHeader tracingHeader, ConsumerRecord<K, V> dataRecord, boolean sampled) {
+        this.tracingHeader = tracingHeader;
         this.dataRecord = dataRecord;
         this.sampled = sampled;
     }
@@ -18,8 +18,8 @@ public class Payload<K, V> {
         return sampled;
     }
 
-    public TracingPayload getTracingPayload() {
-        return tracingPayload;
+    public TracingHeader getTracingHeader() {
+        return tracingHeader;
     }
 
     public ConsumerRecord<K, V> record() {

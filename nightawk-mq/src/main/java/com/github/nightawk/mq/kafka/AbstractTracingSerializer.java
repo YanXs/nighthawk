@@ -22,11 +22,11 @@ public abstract class AbstractTracingSerializer<T> implements Serializer<T> {
         }
     }
 
-    protected TracingPayload startTracing(String topic) {
+    protected TracingHeader startTracing(String topic) {
         SpanId spanId = brave.clientTracer().startNewSpan("kafka - " + topic);
-        TracingPayload tp = null;
+        TracingHeader tp = null;
         if (spanId != null) {
-            tp = new TracingPayload();
+            tp = new TracingHeader();
             tp.setTraceId(IdConversion.convertToString(spanId.traceId));
             tp.setSpanId(IdConversion.convertToString(spanId.spanId));
             tp.setParentSpanId(IdConversion.convertToString(spanId.parentId));
@@ -36,7 +36,7 @@ public abstract class AbstractTracingSerializer<T> implements Serializer<T> {
     }
 
     protected byte[] assemblePayload(String topic, byte[] data) {
-        TracingPayload tp = startTracing(topic);
+        TracingHeader tp = startTracing(topic);
         if (tp == null) {
             return data;
         } else {

@@ -1,6 +1,6 @@
 package com.github.nightawk.mq.kafka;
 
-public class TracingPayload {
+public class TracingHeader {
 
     public static final int LENGTH = 49;
 
@@ -68,12 +68,12 @@ public class TracingPayload {
         return input;
     }
 
-    public static TracingPayload fromBytes(byte[] bytes) {
+    public static TracingHeader fromBytes(byte[] bytes) {
         if (bytes.length != LENGTH) {
             throw new IllegalArgumentException("bytes illegal");
         }
         String tpString = new String(bytes);
-        TracingPayload tp = new TracingPayload();
+        TracingHeader tp = new TracingHeader();
         tp.setTraceId(trimmedString(tpString.substring(0, 16)));
         tp.setSpanId(trimmedString(tpString.substring(17, 32)));
         tp.setParentSpanId(trimmedString(tpString.substring(33, 48)));

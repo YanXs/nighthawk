@@ -12,21 +12,21 @@ import static com.github.kristofa.brave.IdConversion.convertToLong;
 
 public class KafkaServerRequestAdapter implements ServerRequestAdapter {
 
-    private final TracingPayload tracingPayload;
+    private final TracingHeader tracingHeader;
 
-    public KafkaServerRequestAdapter(TracingPayload tracingPayload) {
-        this.tracingPayload = tracingPayload;
+    public KafkaServerRequestAdapter(TracingHeader tracingHeader) {
+        this.tracingHeader = tracingHeader;
     }
 
     @Override
     public TraceData getTraceData() {
-        String sampled = tracingPayload.getSampled();
+        String sampled = tracingHeader.getSampled();
         if (sampled == null || sampled.equals("0")) {
             return TraceData.builder().sample(false).build();
         } else {
-            final String parentSpanId = tracingPayload.getParentSpanId();
-            final String traceId = tracingPayload.getTraceId();
-            final String spanId = tracingPayload.getSpanId();
+            final String parentSpanId = tracingHeader.getParentSpanId();
+            final String traceId = tracingHeader.getTraceId();
+            final String spanId = tracingHeader.getSpanId();
 
             if (traceId != null && spanId != null) {
                 SpanId span = getSpanId(traceId, spanId, parentSpanId);

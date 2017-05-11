@@ -12,7 +12,7 @@ public class PayloadCodec {
     public static final short MAGIC = (short) 0xbabe;
 
     public static <K, V> Payload<K, V> decodePayload(Deserializer<V> valueDeserializer, ConsumerRecord<K, byte[]> originConsumerRecord) {
-        TracingPayload tracingPayload = null;
+        TracingHeader tracingHeader = null;
         ConsumerRecord<K, V> dataRecord = null;
         boolean sampled = false;
         byte[] data = originConsumerRecord.value();
@@ -23,10 +23,10 @@ public class PayloadCodec {
             ByteBuffer byteBuf = ByteBuffer.wrap(data);
             short magic = byteBuf.getShort(0);
             short tpLen = byteBuf.getShort(2);
-            if (magic == MAGIC && tpLen == TracingPayload.LENGTH) {
+            if (magic == MAGIC && tpLen == TracingHeader.LENGTH) {
                 byte[] tpBytes = new byte[tpLen];
                 System.arraycopy(byteBuf.array(), HEADER_LENGTH, tpBytes, 0, tpLen);
-                tracingPayload = TracingPayload.fromBytes(tpBytes);
+                tracingHeader = TracingHeader.fromBytes(tpBytes);
                 sampled = true;
                 int dataOffset = tpLen + HEADER_LENGTH;
                 vData = new byte[byteBuf.array().length - dataOffset];
@@ -38,11 +38,11 @@ public class PayloadCodec {
         dataRecord = new ConsumerRecord<>(originConsumerRecord.topic(),
                 originConsumerRecord.partition(), originConsumerRecord.offset(),
                 originConsumerRecord.key(), valueDeserializer.deserialize(originConsumerRecord.topic(), vData));
-        return new Payload<>(tracingPayload, dataRecord, sampled);
+        return new Payload<>(tracingHeader, dataRecord, sampled);
     }
 
 
-    public static byte[] encodePayload(TracingPayload tp, byte[] data) {
+    public static byte[] encodePayload(TracingHeader tp, byte[] data) {
         byte[] tpBytes = tp.toBytes();
         short tpLength = (short) tpBytes.length;
         ByteBuffer byteBuffer = ByteBuffer.allocate(HEADER_LENGTH + tpBytes.length + data.length);
