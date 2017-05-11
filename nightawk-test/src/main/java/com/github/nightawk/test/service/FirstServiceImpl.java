@@ -8,7 +8,6 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import redis.clients.jedis.Jedis;
 
 import java.util.List;
-import java.util.Properties;
 import java.util.UUID;
 
 public class FirstServiceImpl implements FirstService {
@@ -50,7 +49,7 @@ public class FirstServiceImpl implements FirstService {
             e.printStackTrace();
         }
         //kafka
-        kafkaProducer.send(new ProducerRecord<>("test", "hello", ("kafka - " + System.currentTimeMillis()).getBytes()));
+        kafkaProducer.send(new ProducerRecord<>("nightawk", UUID.randomUUID().toString(), ("kafka - " + System.currentTimeMillis()).getBytes()));
         try {
             Thread.sleep(50);
         } catch (InterruptedException e) {
