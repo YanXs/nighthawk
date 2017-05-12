@@ -32,9 +32,11 @@
         <property name="dataSource" ref="dataSource_mysql1"/>
     </bean>
 
-    <bean id="statementTracer" class="com.github.nightawk.jdbc.StatementTracer">
-        <property name="clientTracer" value="#{brave.clientTracer()}"/>
+    <bean id="clientTracerMBean" class="com.github.nightawk.core.ClientTracerMBean">
+        <constructor-arg value="#{brave.clientTracer()}"/>
     </bean>
+
+    <bean id="statementTracer" class="com.github.nightawk.jdbc.StatementTracer"/>
 
     <bean id="basicDataSourceInterceptor" class="com.github.nightawk.jdbc.basic.BasicDataSourceTracingInterceptor">
         <constructor-arg ref="statementTracer"/>

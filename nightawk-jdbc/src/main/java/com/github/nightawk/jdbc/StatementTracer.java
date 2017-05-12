@@ -1,38 +1,26 @@
 package com.github.nightawk.jdbc;
 
-import com.github.kristofa.brave.ClientTracer;
-import com.github.kristofa.brave.SpanId;
-import com.github.nightawk.core.util.TracingLoop;
+import com.github.nightawk.core.ClientTracerSupport;
 import com.github.nightawk.jdbc.support.*;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.net.Inet4Address;
 import java.net.InetAddress;
-import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
  * @author Xs.
  */
-public class StatementTracer implements TracingLoop {
-
-    private volatile ClientTracer clientTracer;
+public class StatementTracer extends ClientTracerSupport {
 
     private Map<String, URLParser> parsers;
-
-    private final TracingLoop delegate = TracingLoop.DEFAULT_LOOP;
 
     public StatementTracer() {
         parsers = new HashMap<>();
         parsers.put("mysql", new MysqlURLParser());
         parsers.put("oracle", new OracleURLParser());
         parsers.put("db2", new DB2URLParser());
-    }
-
-    public void setClientTracer(ClientTracer clientTracer) {
-        this.clientTracer = clientTracer;
     }
 
     public void setParsers(Map<String, URLParser> parsers) {
@@ -47,12 +35,9 @@ public class StatementTracer implements TracingLoop {
         }
     }
 
-    public boolean isTraceEnabled() {
-        return clientTracer != null;
-    }
 
     public void beginTrace(String sql, String url) {
-        if (clientTracer != null) {
+        if (isTraceEnabled()) {
             try {
                 String afterJDBC = url.substring(5); // jdbc:
                 String scheme = afterJDBC.substring(0, afterJDBC.indexOf(":"));
@@ -63,65 +48,28 @@ public class StatementTracer implements TracingLoop {
                 DatabaseURL databaseUrl = parser.parse(url);
                 String serviceName = scheme + "-" + databaseUrl.getDataBase();
                 InetAddress address = Inet4Address.getByName(databaseUrl.getHost());
-                SpanId spanId = clientTracer.startNewSpan(scheme);
-                if (spanId != null) {
-                    joinTracingLoop();
-                    clientTracer.submitBinaryAnnotation("execute.sql", sql);
-                    setClientSent(address, databaseUrl.getPort(), serviceName);
-                }
+                Beginning beginning = new Beginning();
+                beginning.setSpanName(serviceName);
+                beginning.setAddress(address);
+                beginning.setPort(databaseUrl.getPort());
+                beginning.addAnnotation("execute.sql", sql);
+                beginTrace(beginning);
             } catch (Exception e) {
-                if (inTracingLoop()) {
-                    clientTracer.setClientSent();
-                }
+                setClientSent();
             }
         }
-    }
-
-    private void setClientSent(InetAddress address, int port, String serviceName) {
-        int ipv4 = ByteBuffer.wrap(address.getAddress()).getInt();
-        clientTracer.setClientSent(ipv4, port, serviceName);
     }
 
     public void endTrace(final int warningCount, final Throwable throwable) {
-        try {
-            if (clientTracer != null && inTracingLoop()) {
-                try {
-                    if (warningCount > 0) {
-                        clientTracer.submitBinaryAnnotation("warning.count", warningCount);
-                    }
-                    if (throwable != null) {
-                        clientTracer.submitBinaryAnnotation("error.message", traceThrowable(throwable));
-                    }
-                } finally {
-                    clientTracer.setClientReceived();
-                }
+        if (isTraceEnabled()) {
+            Ending ending = new Ending();
+            if (warningCount > 0) {
+                ending.addAnnotation("warning.count", String.valueOf(warningCount));
             }
-        } finally {
-            if (inTracingLoop()) {
-                leaveTracingLoop();
+            if (throwable != null) {
+                ending.addAnnotation("error.message", ExceptionUtils.getStackTrace(throwable));
             }
+            endTrace(ending);
         }
-    }
-
-    private String traceThrowable(Throwable throwable) {
-        StringWriter stringWriter = new StringWriter(8096);
-        PrintWriter printWriter = new PrintWriter(stringWriter);
-        throwable.printStackTrace(printWriter);
-        return stringWriter.toString();
-    }
-
-    @Override
-    public boolean inTracingLoop() {
-        return delegate.inTracingLoop();
-    }
-
-    @Override
-    public void joinTracingLoop() {
-        delegate.joinTracingLoop();
-    }
-
-    @Override
-    public void leaveTracingLoop() {
-        delegate.leaveTracingLoop();
     }
 }

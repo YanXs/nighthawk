@@ -1,4 +1,4 @@
-package com.github.nightawk.core.util;
+package com.github.nightawk.core;
 
 public class ThreadLocalTracingLoop implements TracingLoop {
 

@@ -13,9 +13,7 @@
         <property name="transportAddress" value="127.0.0.1:9411"/>
     </bean>
 
-    <bean id="statementTracer" class="com.github.nightawk.jdbc.StatementTracer">
-        <property name="clientTracer" value="#{brave.clientTracer()}"/>
-    </bean>
+    <bean id="statementTracer" class="com.github.nightawk.jdbc.StatementTracer"/>
 
     <bean id="basicDataSourceInterceptor" class="com.github.nightawk.jdbc.basic.BasicDataSourceTracingInterceptor">
         <constructor-arg ref="statementTracer"/>

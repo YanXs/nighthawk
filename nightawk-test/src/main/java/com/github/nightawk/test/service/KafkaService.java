@@ -25,7 +25,7 @@ public class KafkaService extends AbstractTracingListener {
     @Override
     public void onPayload(Payload payload) {
         try {
-            Sleeper.JUST.sleepFor(1000, TimeUnit.MILLISECONDS);
+            Sleeper.JUST.sleepFor(200, TimeUnit.MILLISECONDS);
             System.out.println(payload.record().value());
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
