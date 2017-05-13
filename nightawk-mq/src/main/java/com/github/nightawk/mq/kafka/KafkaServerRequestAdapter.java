@@ -38,7 +38,7 @@ public class KafkaServerRequestAdapter implements ServerRequestAdapter {
 
     @Override
     public String getSpanName() {
-        return "kafka-mq";
+        return "kafka-tracing";
     }
 
     @Override

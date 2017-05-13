@@ -15,6 +15,23 @@ nightawk提供多种追踪功能：
     -- nightawk-tomcat-jdbc  提供对tomcat-jdbc的监控  
 * nightawk-mq    提供消息中间件的追踪功能，目前支持kafka,rabbitmq
 
+# ScreenShots
+
+* query trace
+
+![image](http://opvsp0g0q.bkt.clouddn.com/find-trace.png)
+
+* tracing details
+
+![image](http://opvsp0g0q.bkt.clouddn.com/overview.png)
+
+* dependencies
+
+![image](http://opvsp0g0q.bkt.clouddn.com/dp.png)
+
+* span
+
+![image](http://opvsp0g0q.bkt.clouddn.com/dubbo-s2.png)
 
 ## 使用方法
 * nightawk-dubbo

@@ -43,7 +43,7 @@
 
 
     <bean id="brave" class="com.github.nightawk.core.brave.BraveFactoryBean">
-        <property name="serviceName" value="simpleService1"/>
+        <property name="serviceName" value="dubbo-simpleService1"/>
         <property name="transport" value="http"/>
         <property name="transportAddress" value="127.0.0.1:9411"/>
     </bean>
