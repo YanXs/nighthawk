@@ -1,9 +1,9 @@
 # nightawk
 
-nightawk是一个分布式服务追踪框架，利用[Zipkin](http://zipkin.io/)收集分布式链路数据，以zipkin UI展示，Zipkin提供多种客户端,nightawk使用java客户端[brave](https://github.com/openzipkin/brave)收集数据
-nightawk提供多种追踪功能：
+nightawk是一个分布式服务追踪库，以[Zipkin](http://zipkin.io/)为基础实现分布式链路追踪
 
 ## 目前支持的追踪功能
+* http zipkin的[brave](https://github.com/openzipkin/brave)提供了基于http消息追踪的类库
 * nightawk-dubbo 提供[dubbo3](https://github.com/YanXs/dubbo3)框架链路追踪的功能，具体开启方式见[dubbo3](https://github.com/YanXs/dubbo3)教程
 * nightawk-redis 提供redis调用监控功能
 * nightawk-jdbc  提供如下几种方式监控数据库:
@@ -32,6 +32,9 @@ nightawk提供多种追踪功能：
 * span
 
 ![image](http://opvsp0g0q.bkt.clouddn.com/dubbo-s2.png)
+
+## 使用文档
+* [wiki](https://github.com/YanXs/nighthawk/wiki)
 
 ## 使用方法
 * nightawk-dubbo
