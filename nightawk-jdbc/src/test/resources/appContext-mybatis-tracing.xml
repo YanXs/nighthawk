@@ -18,13 +18,11 @@
         <property name="transportAddress" value="127.0.0.1:9411"/>
     </bean>
 
-    <bean id="statementTracer" class="com.github.nightawk.jdbc.StatementTracer">
-        <property name="clientTracer" value="#{brave.clientTracer()}"/>
+    <bean id="clientTracerMBean" class="com.github.nightawk.core.ClientTracerMBean">
+        <constructor-arg value="#{brave.clientTracer()}"/>
     </bean>
 
-    <bean id="basicDataSourceInterceptor" class="com.github.nightawk.jdbc.basic.BasicDataSourceTracingInterceptor">
-        <constructor-arg ref="statementTracer"/>
-    </bean>
+    <bean id="statementTracer" class="com.github.nightawk.jdbc.StatementTracer"/>
 
     <bean id="dataSource_mysql" class="com.github.nightawk.jdbc.mybatis.BasicDataSourceAdapter">
         <constructor-arg ref="dataSource_mysql_origin"/>

@@ -52,7 +52,7 @@ public class TracingHeader {
             throw new IllegalStateException("tracing span illegal");
         }
 
-        StringBuilder stringBuilder = new StringBuilder(49);
+        StringBuilder stringBuilder = new StringBuilder(LENGTH);
         stringBuilder
                 .append(appendBlankIfNeeded(traceId))
                 .append(appendBlankIfNeeded(spanId))
