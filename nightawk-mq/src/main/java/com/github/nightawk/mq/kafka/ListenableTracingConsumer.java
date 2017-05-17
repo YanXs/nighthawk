@@ -2,9 +2,6 @@ package com.github.nightawk.mq.kafka;
 
 import com.github.nightawk.core.util.ErrorHandler;
 import org.apache.kafka.clients.consumer.*;
-import org.apache.kafka.common.Metric;
-import org.apache.kafka.common.MetricName;
-import org.apache.kafka.common.PartitionInfo;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.errors.WakeupException;
 import org.apache.kafka.common.serialization.Deserializer;
@@ -14,7 +11,7 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 import java.util.regex.Pattern;
 
-public class ListenableTracingConsumer<K, V> implements ListenableConsumer<K, V>, Runnable {
+public class ListenableTracingConsumer<K, V> extends AbstractListenableConsumer<K, V> implements Runnable {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -37,6 +34,7 @@ public class ListenableTracingConsumer<K, V> implements ListenableConsumer<K, V>
     private ErrorHandler errorHandler;
 
     public ListenableTracingConsumer(Consumer<K, byte[]> delegate, Collection<String> topics, Deserializer<V> valueDeserializer) {
+        super(delegate);
         this.delegate = delegate;
         this.topics = topics;
         this.topicPattern = null;
@@ -44,6 +42,7 @@ public class ListenableTracingConsumer<K, V> implements ListenableConsumer<K, V>
     }
 
     public ListenableTracingConsumer(Consumer<K, byte[]> delegate, Pattern topicPattern, Deserializer<V> valueDeserializer) {
+        super(delegate);
         this.delegate = delegate;
         this.topicPattern = topicPattern;
         this.topics = null;
@@ -94,41 +93,6 @@ public class ListenableTracingConsumer<K, V> implements ListenableConsumer<K, V>
         this.listener = payloadListener;
     }
 
-    @Override
-    public Set<TopicPartition> assignment() {
-        return delegate.assignment();
-    }
-
-    @Override
-    public Set<String> subscription() {
-        return delegate.subscription();
-    }
-
-    @Override
-    public void subscribe(Collection<String> topics) {
-        delegate.subscribe(topics);
-    }
-
-    @Override
-    public void subscribe(Collection<String> topics, ConsumerRebalanceListener callback) {
-        delegate.subscribe(topics, callback);
-    }
-
-    @Override
-    public void assign(Collection<TopicPartition> partitions) {
-        delegate.assign(partitions);
-    }
-
-    @Override
-    public void subscribe(Pattern pattern, ConsumerRebalanceListener callback) {
-        delegate.subscribe(pattern, callback);
-    }
-
-    @Override
-    public void unsubscribe() {
-        delegate.unsubscribe();
-    }
-
     public ConsumerRecords<K, V> poll(long timeout) {
         ConsumerRecords<K, byte[]> records = delegate.poll(timeout);
         Map<TopicPartition, List<ConsumerRecord<K, V>>> dataRecords = new HashMap<>();
@@ -149,81 +113,6 @@ public class ListenableTracingConsumer<K, V> implements ListenableConsumer<K, V>
             payloadContainer.add(payload);
         }
         return new ConsumerRecords<>(dataRecords);
-    }
-
-    @Override
-    public void commitSync(final Map<TopicPartition, OffsetAndMetadata> offsets) {
-        delegate.commitSync(offsets);
-    }
-
-    @Override
-    public void commitAsync(final Map<TopicPartition, OffsetAndMetadata> offsets, OffsetCommitCallback callback) {
-        delegate.commitAsync();
-    }
-
-    @Override
-    public void seek(TopicPartition partition, long offset) {
-        delegate.seek(partition, offset);
-    }
-
-    @Override
-    public void seekToBeginning(Collection<TopicPartition> partitions) {
-        delegate.seekToBeginning(partitions);
-    }
-
-    @Override
-    public void seekToEnd(Collection<TopicPartition> partitions) {
-        delegate.seekToEnd(partitions);
-    }
-
-    @Override
-    public long position(TopicPartition partition) {
-        return delegate.position(partition);
-    }
-
-    @Override
-    public OffsetAndMetadata committed(TopicPartition partition) {
-        return delegate.committed(partition);
-    }
-
-    @Override
-    public Map<MetricName, ? extends Metric> metrics() {
-        return delegate.metrics();
-    }
-
-    @Override
-    public List<PartitionInfo> partitionsFor(String topic) {
-        return delegate.partitionsFor(topic);
-    }
-
-    @Override
-    public Map<String, List<PartitionInfo>> listTopics() {
-        return delegate.listTopics();
-    }
-
-    @Override
-    public Set<TopicPartition> paused() {
-        return delegate.paused();
-    }
-
-    @Override
-    public void pause(Collection<TopicPartition> partitions) {
-        delegate.pause(partitions);
-    }
-
-    @Override
-    public void resume(Collection<TopicPartition> partitions) {
-        delegate.resume(partitions);
-    }
-
-    @Override
-    public void close() {
-        delegate.close();
-    }
-
-    @Override
-    public void wakeup() {
-        delegate.wakeup();
     }
 
     @Override
@@ -331,17 +220,5 @@ public class ListenableTracingConsumer<K, V> implements ListenableConsumer<K, V>
         public boolean isEmpty() {
             return pendingPayloads.isEmpty();
         }
-    }
-
-    public void commitSync() {
-        delegate.commitSync();
-    }
-
-    public void commitAsync() {
-        delegate.commitAsync();
-    }
-
-    public void commitAsync(OffsetCommitCallback callback) {
-        delegate.commitAsync(callback);
     }
 }
