@@ -44,12 +44,15 @@ public abstract class AbstractTracingSerializer<T> implements Serializer<T> {
         }
     }
 
-    protected abstract byte[] encode(T data);
+    @Override
+    public byte[] serialize(String topic, T data) {
+        return assemblePayload(topic, doSerialize(data));
+    }
+
+
+    protected abstract byte[] doSerialize(T data);
 
     @Override
     public void close() {
     }
-
-
-
 }
