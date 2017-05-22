@@ -76,7 +76,6 @@ public class RetryLoop {
         isDone = true;
     }
 
-    // TODO
     public static boolean isRetryException(Throwable exception) {
         return exception instanceof RetryableException;
     }
@@ -97,6 +96,13 @@ public class RetryLoop {
         }
     }
 
-    private static class RetryableException extends Exception {
+    public static class RetryableException extends Exception {
+        public RetryableException(String message) {
+            super(message);
+        }
+
+        public RetryableException(String message, Throwable cause) {
+            super(message, cause);
+        }
     }
 }
